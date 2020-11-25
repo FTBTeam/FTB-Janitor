@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_8",
 	"refmap": "ftbjanitor.refmap.json",
 	"mixins": [
+		"MissingMappingsMixin"
 	],
 	"client": [
 	],
