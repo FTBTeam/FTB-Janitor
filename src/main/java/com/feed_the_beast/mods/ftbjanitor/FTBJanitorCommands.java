@@ -21,6 +21,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,8 @@ import java.util.Set;
 @Mod.EventBusSubscriber(modid = FTBJanitor.MOD_ID)
 public class FTBJanitorCommands
 {
+	public static final Map<String, MutableLong> LOGGED_TOML_CONFIGS = new HashMap<>();
+
 	@SubscribeEvent
 	public static void registerCommands(RegisterCommandsEvent event)
 	{
@@ -38,6 +41,12 @@ public class FTBJanitorCommands
 				.requires(source -> source.getServer().isSinglePlayer() || source.hasPermissionLevel(2))
 				.then(Commands.literal("dump_all_entity_brains")
 						.executes(context -> dumpAllEntityBrains(context.getSource()))
+				)
+				.then(Commands.literal("print_toml_config_calls")
+						.executes(context -> printTomlConfigCalls(context.getSource()))
+				)
+				.then(Commands.literal("reset_toml_config_calls")
+						.executes(context -> resetTomlConfigCalls(context.getSource()))
 				)
 		);
 	}
@@ -140,5 +149,19 @@ public class FTBJanitorCommands
 	private static void print(List<String> lines, String[] line)
 	{
 		lines.add(String.join(",", line));
+	}
+
+	private static int printTomlConfigCalls(CommandSource source)
+	{
+		source.sendFeedback(new StringTextComponent("Logged toml config calls:"), false);
+		LOGGED_TOML_CONFIGS.entrySet().stream().sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue())).forEach(entry -> source.sendFeedback(new StringTextComponent(entry.getKey() + " = " + Long.toUnsignedString(entry.getValue().getValue())), false));
+		return 1;
+	}
+
+	private static int resetTomlConfigCalls(CommandSource source)
+	{
+		source.sendFeedback(new StringTextComponent("Config logger reset"), false);
+		LOGGED_TOML_CONFIGS.clear();
+		return 1;
 	}
 }
