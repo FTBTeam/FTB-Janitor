@@ -14,6 +14,7 @@ public class FTBJanitorConfig
 {
 	public static boolean logTagCreation;
 	public static boolean logTomlConfigGetters;
+	public static boolean cacheTomlConfigGetters;
 
 	private static Pair<CommonConfig, ForgeConfigSpec> common;
 
@@ -37,6 +38,7 @@ public class FTBJanitorConfig
 			CommonConfig c = common.getLeft();
 			logTagCreation = c.logTagCreation.get();
 			logTomlConfigGetters = c.logTomlConfigGetters.get();
+			cacheTomlConfigGetters = c.cacheTomlConfigGetters.get();
 		}
 	}
 
@@ -44,6 +46,7 @@ public class FTBJanitorConfig
 	{
 		private final ForgeConfigSpec.BooleanValue logTagCreation;
 		private final ForgeConfigSpec.BooleanValue logTomlConfigGetters;
+		private final ForgeConfigSpec.BooleanValue cacheTomlConfigGetters;
 
 		private CommonConfig(ForgeConfigSpec.Builder builder)
 		{
@@ -52,6 +55,9 @@ public class FTBJanitorConfig
 
 			logTomlConfigGetters = builder
 					.define("logTomlConfigGetters", false);
+
+			cacheTomlConfigGetters = builder
+					.define("cacheTomlConfigGetters", false);
 		}
 	}
 }
