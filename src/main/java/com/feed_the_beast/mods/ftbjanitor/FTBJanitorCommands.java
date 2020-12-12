@@ -153,8 +153,8 @@ public class FTBJanitorCommands
 
 	private static int printTomlConfigCalls(CommandSource source)
 	{
-		source.sendFeedback(new StringTextComponent("Logged toml config calls:"), false);
-		LOGGED_TOML_CONFIGS.entrySet().stream().sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue())).forEach(entry -> source.sendFeedback(new StringTextComponent(entry.getKey() + " = " + Long.toUnsignedString(entry.getValue().getValue())), false));
+		source.sendFeedback(new StringTextComponent("Suspicious toml config calls:"), false);
+		LOGGED_TOML_CONFIGS.entrySet().stream().filter(e -> e.getValue().getValue() > 1L).sorted((o1, o2) -> o2.getValue().compareTo(o1.getValue())).forEach(entry -> source.sendFeedback(new StringTextComponent(entry.getKey() + " = " + Long.toUnsignedString(entry.getValue().getValue())), false));
 		return 1;
 	}
 
