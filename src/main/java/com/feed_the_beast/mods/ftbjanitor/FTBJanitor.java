@@ -24,5 +24,6 @@ public class FTBJanitor
 	{
 		Locale.setDefault(Locale.US);
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+		FTBJanitorConfig.init();
 	}
 }

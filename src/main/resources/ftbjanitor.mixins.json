@@ -5,6 +5,7 @@
 	"refmap": "ftbjanitor.refmap.json",
 	"mixins": [
 		"BrainMixin",
+		"ConfigValueMixin",
 		"MissingMappingsMixin",
 		"TaskMixin"
 	],
