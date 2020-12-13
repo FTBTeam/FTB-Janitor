@@ -32,8 +32,12 @@ public abstract class ConfigValueMixin<T>
 	{
 		if (FTBJanitorConfig.cacheTomlConfigGetters && cachedGetFTBJ == null)
 		{
-			ForgeConfigSpec.ConfigValue<T> configValue = (ForgeConfigSpec.ConfigValue<T>) (Object) this;
-			FTBJanitor.LOGGER.info("Cached config: " + String.join(".", configValue.getPath()) + ": " + ci.getReturnValue() + " (from " + new Exception().getStackTrace()[2] + ")");
+			if (FTBJanitorConfig.logTomlConfigGetters)
+			{
+				ForgeConfigSpec.ConfigValue<T> configValue = (ForgeConfigSpec.ConfigValue<T>) (Object) this;
+				FTBJanitor.LOGGER.info("Cached config: " + String.join(".", configValue.getPath()) + ": " + ci.getReturnValue() + " (from " + new Exception().getStackTrace()[2] + ")");
+			}
+
 			cachedGetFTBJ = ci.getReturnValue();
 		}
 
