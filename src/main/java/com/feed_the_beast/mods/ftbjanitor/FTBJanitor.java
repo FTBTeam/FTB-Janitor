@@ -22,6 +22,8 @@ public class FTBJanitor
 	public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 	public static FTBJanitorCommon proxy;
 
+	public static boolean ignoreResourceLocationErrors = false;
+
 	public FTBJanitor()
 	{
 		Locale.setDefault(Locale.US);

@@ -8,8 +8,7 @@ import net.minecraft.command.CommandSource;
  */
 public class FTBJanitorCommon
 {
-	public void registerCommands(LiteralArgumentBuilder<CommandSource> command)
+	public void registerCommands(LiteralArgumentBuilder<CommandSource> command, LiteralArgumentBuilder<CommandSource> dump)
 	{
-
 	}
 }

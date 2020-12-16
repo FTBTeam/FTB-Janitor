@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,14 +25,12 @@ import java.util.stream.Collectors;
 public class FTBJanitorClient extends FTBJanitorCommon
 {
 	@Override
-	public void registerCommands(LiteralArgumentBuilder<CommandSource> command)
+	public void registerCommands(LiteralArgumentBuilder<CommandSource> command, LiteralArgumentBuilder<CommandSource> dump)
 	{
-		command.then(Commands.literal("dump_all_client_resources")
-				.executes(context -> dumpAllResources(context.getSource()))
-		);
+		dump.then(Commands.literal("client_resources").executes(context -> dumpClientResources(context.getSource())));
 	}
 
-	private int dumpAllResources(CommandSource source)
+	private int dumpClientResources(CommandSource source)
 	{
 		Minecraft.getInstance().execute(() -> {
 			List<Pair<ResourceLocation, Long>> list = new ArrayList<>();
@@ -40,8 +39,30 @@ public class FTBJanitorClient extends FTBJanitorCommon
 			source.sendFeedback(new StringTextComponent("Loading client resources..."), false);
 
 			IResourceManager manager = Minecraft.getInstance().getResourceManager();
+			LinkedHashSet<ResourceLocation> locations = new LinkedHashSet<>();
+			FTBJanitor.ignoreResourceLocationErrors = true;
 
-			for (ResourceLocation res : manager.getAllResourceLocations(".", s -> true))
+			try
+			{
+				locations.addAll(manager.getAllResourceLocations(".", s -> true));
+				locations.addAll(manager.getAllResourceLocations("textures", s -> true));
+				locations.addAll(manager.getAllResourceLocations("font", s -> true));
+				locations.addAll(manager.getAllResourceLocations("lang", s -> true));
+				locations.addAll(manager.getAllResourceLocations("blockstates", s -> true));
+				locations.addAll(manager.getAllResourceLocations("models", s -> true));
+				locations.addAll(manager.getAllResourceLocations("particles", s -> true));
+				locations.addAll(manager.getAllResourceLocations("shaders", s -> true));
+				locations.addAll(manager.getAllResourceLocations("texts", s -> true));
+				locations.addAll(manager.getAllResourceLocations("sounds", s -> true));
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+
+			FTBJanitor.ignoreResourceLocationErrors = false;
+
+			for (ResourceLocation res : locations)
 			{
 				long size = 0L;
 
@@ -58,7 +79,7 @@ public class FTBJanitorClient extends FTBJanitorCommon
 				}
 				catch (Exception ex)
 				{
-					ex.printStackTrace();
+					size = 0L;
 				}
 
 				list.add(Pair.of(res, size));
