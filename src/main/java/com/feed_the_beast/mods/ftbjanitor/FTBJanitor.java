@@ -1,5 +1,6 @@
 package com.feed_the_beast.mods.ftbjanitor;
 
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -19,11 +20,13 @@ public class FTBJanitor
 	public static final String MOD_ID = "ftbjanitor";
 	public static final String MOD_NAME = "FTB Janitor";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
+	public static FTBJanitorCommon proxy;
 
 	public FTBJanitor()
 	{
 		Locale.setDefault(Locale.US);
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 		FTBJanitorConfig.init();
+		proxy = DistExecutor.safeRunForDist(() -> FTBJanitorClient::new, () -> FTBJanitorCommon::new);
 	}
 }

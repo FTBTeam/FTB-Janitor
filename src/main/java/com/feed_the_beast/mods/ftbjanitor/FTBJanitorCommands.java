@@ -2,6 +2,7 @@ package com.feed_the_beast.mods.ftbjanitor;
 
 import com.feed_the_beast.mods.ftbjanitor.core.BrainFTBJ;
 import com.feed_the_beast.mods.ftbjanitor.core.TaskFTBJ;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.util.UUIDTypeAdapter;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -10,6 +11,7 @@ import net.minecraft.entity.ai.brain.memory.MemoryModuleStatus;
 import net.minecraft.entity.ai.brain.memory.MemoryModuleType;
 import net.minecraft.entity.ai.brain.schedule.Activity;
 import net.minecraft.entity.ai.brain.task.Task;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
@@ -37,18 +39,32 @@ public class FTBJanitorCommands
 	@SubscribeEvent
 	public static void registerCommands(RegisterCommandsEvent event)
 	{
-		event.getDispatcher().register(Commands.literal("ftbjanitor")
+		LiteralArgumentBuilder<CommandSource> command = Commands.literal("ftbjanitor")
 				.requires(source -> source.getServer().isSinglePlayer() || source.hasPermissionLevel(2))
 				.then(Commands.literal("dump_all_entity_brains")
 						.executes(context -> dumpAllEntityBrains(context.getSource()))
 				)
-				.then(Commands.literal("print_toml_config_calls")
-						.executes(context -> printTomlConfigCalls(context.getSource()))
-				)
-				.then(Commands.literal("reset_toml_config_calls")
-						.executes(context -> resetTomlConfigCalls(context.getSource()))
-				)
-		);
+				.then(Commands.literal("dump_all_registry_keys")
+						.executes(context -> dumpAllRegistryKeys(context.getSource()))
+				);
+
+		if (FTBJanitorConfig.logTomlConfigGetters)
+		{
+			command
+					.then(Commands.literal("print_toml_config_calls")
+							.executes(context -> printTomlConfigCalls(context.getSource()))
+					)
+					.then(Commands.literal("reset_toml_config_calls")
+							.executes(context -> resetTomlConfigCalls(context.getSource()))
+					);
+		}
+
+		if (event.getEnvironment() != Commands.EnvironmentType.DEDICATED)
+		{
+			FTBJanitor.proxy.registerCommands(command);
+		}
+
+		event.getDispatcher().register(command);
 	}
 
 	private static int dumpAllEntityBrains(CommandSource source)
@@ -134,8 +150,8 @@ public class FTBJanitorCommands
 			Files.write(source.getServer().func_240776_a_(FolderName.DOT).resolve(filename), lines);
 
 			source.sendFeedback(new StringTextComponent("Entity brain dump saved as " + filename + " (" + lines.size() + " lines)"), true);
-			source.sendFeedback(new StringTextComponent("Dimension count: " + dimensionCount.getValue()), true);
-			source.sendFeedback(new StringTextComponent("Entities with special tasks: " + entityWithTasksCount.getValue() + "/" + entityCount.getValue()), true);
+			source.sendFeedback(new StringTextComponent("Dimension count: " + dimensionCount.getValue()), false);
+			source.sendFeedback(new StringTextComponent("Entities with special tasks: " + entityWithTasksCount.getValue() + "/" + entityCount.getValue()), false);
 			return 1;
 		}
 		catch (Exception ex)
@@ -149,6 +165,39 @@ public class FTBJanitorCommands
 	private static void print(List<String> lines, String[] line)
 	{
 		lines.add(String.join(",", line));
+	}
+
+	private static int dumpAllRegistryKeys(CommandSource source)
+	{
+		source.sendFeedback(new StringTextComponent("All registry keys:"), false);
+		List<String> lines = new ArrayList<>(RegistryKey.UNIVERSAL_KEY_MAP.keySet());
+		lines.sort(null);
+
+		long mem = 0L;
+
+		for (String s : lines)
+		{
+			mem += 8L * (((s.length() * 2L) + 45L) / 8L);
+		}
+
+		mem *= 2L; // its actually more but meh, this works
+		double memd = mem / 1024D / 1024D;
+
+		lines.add("");
+		lines.add("Estimated memory usage: " + ((long) (memd * 100D) / 100D) + " MB");
+
+		try
+		{
+			String filename = "registry-key-dump-" + Instant.now().toString().replaceAll("[:T]", "-") + ".txt";
+			Files.write(source.getServer().func_240776_a_(FolderName.DOT).resolve(filename), lines);
+			source.sendFeedback(new StringTextComponent("Registry key dump saved as " + filename + " (" + lines.size() + " lines, " + ((long) (memd * 100D) / 100D) + " MB estimated memory use)"), true);
+			return 1;
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			return 0;
+		}
 	}
 
 	private static int printTomlConfigCalls(CommandSource source)
