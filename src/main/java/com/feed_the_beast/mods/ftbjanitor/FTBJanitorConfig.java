@@ -15,6 +15,7 @@ public class FTBJanitorConfig
 	public static boolean logTagCreation;
 	public static boolean logTomlConfigGetters;
 	public static boolean cacheTomlConfigGetters;
+	public static boolean disableBlockStateCache;
 
 	private static Pair<CommonConfig, ForgeConfigSpec> common;
 
@@ -39,6 +40,7 @@ public class FTBJanitorConfig
 			logTagCreation = c.logTagCreation.get();
 			logTomlConfigGetters = c.logTomlConfigGetters.get();
 			cacheTomlConfigGetters = c.cacheTomlConfigGetters.get();
+			disableBlockStateCache = c.disableBlockStateCache.get();
 		}
 	}
 
@@ -47,17 +49,25 @@ public class FTBJanitorConfig
 		private final ForgeConfigSpec.BooleanValue logTagCreation;
 		private final ForgeConfigSpec.BooleanValue logTomlConfigGetters;
 		private final ForgeConfigSpec.BooleanValue cacheTomlConfigGetters;
+		private final ForgeConfigSpec.BooleanValue disableBlockStateCache;
 
 		private CommonConfig(ForgeConfigSpec.Builder builder)
 		{
 			logTagCreation = builder
+					.comment("Prints new tag creation in console")
 					.define("logTagCreation", false);
 
 			logTomlConfigGetters = builder
+					.comment("Prints get() calls from forge toml configs")
 					.define("logTomlConfigGetters", false);
 
 			cacheTomlConfigGetters = builder
+					.comment("Cache get() calls from forge toml configs. This may improve performance, but may require client restart for some things")
 					.define("cacheTomlConfigGetters", false);
+
+			disableBlockStateCache = builder
+					.comment("Disables block state caching. This may help with RAM but also massively increase CPU usage")
+					.define("disableBlockStateCache", false);
 		}
 	}
 }
