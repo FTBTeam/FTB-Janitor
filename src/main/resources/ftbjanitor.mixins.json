@@ -8,10 +8,13 @@
 		"BrainMixin",
 		"ConfigValueMixin",
 		"MissingMappingsMixin",
+		"NetworkManagerMixin",
 		"ResourceLocationMixin",
 		"TaskMixin"
 	],
 	"client": [
+		"AtlasTextureMixin",
+		"AudioStreamManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

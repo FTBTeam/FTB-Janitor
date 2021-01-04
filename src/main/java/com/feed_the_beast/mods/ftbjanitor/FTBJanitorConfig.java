@@ -16,6 +16,7 @@ public class FTBJanitorConfig
 	public static boolean logTomlConfigGetters;
 	public static boolean cacheTomlConfigGetters;
 	public static boolean disableBlockStateCache;
+	public static boolean logNetworkErrors;
 
 	private static Pair<CommonConfig, ForgeConfigSpec> common;
 
@@ -41,6 +42,7 @@ public class FTBJanitorConfig
 			logTomlConfigGetters = c.logTomlConfigGetters.get();
 			cacheTomlConfigGetters = c.cacheTomlConfigGetters.get();
 			disableBlockStateCache = c.disableBlockStateCache.get();
+			logNetworkErrors = c.logNetworkErrors.get();
 		}
 	}
 
@@ -50,6 +52,7 @@ public class FTBJanitorConfig
 		private final ForgeConfigSpec.BooleanValue logTomlConfigGetters;
 		private final ForgeConfigSpec.BooleanValue cacheTomlConfigGetters;
 		private final ForgeConfigSpec.BooleanValue disableBlockStateCache;
+		private final ForgeConfigSpec.BooleanValue logNetworkErrors;
 
 		private CommonConfig(ForgeConfigSpec.Builder builder)
 		{
@@ -68,6 +71,10 @@ public class FTBJanitorConfig
 			disableBlockStateCache = builder
 					.comment("Disables block state caching. This may help with RAM but also massively increase CPU usage")
 					.define("disableBlockStateCache", false);
+
+			logNetworkErrors = builder
+					.comment("Prints network errors in normal log rather than debug")
+					.define("printNetworkErrors", false);
 		}
 	}
 }
