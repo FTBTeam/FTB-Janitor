@@ -17,7 +17,6 @@ public class FTBJanitorConfig
 	public static boolean cacheTomlConfigGetters;
 	public static boolean disableBlockStateCache;
 	public static boolean logNetworkErrors;
-	public static boolean increase2CConfigMaxKeySize;
 
 	private static Pair<CommonConfig, ForgeConfigSpec> common;
 
@@ -44,7 +43,6 @@ public class FTBJanitorConfig
 			cacheTomlConfigGetters = c.cacheTomlConfigGetters.get();
 			disableBlockStateCache = c.disableBlockStateCache.get();
 			logNetworkErrors = c.logNetworkErrors.get();
-			increase2CConfigMaxKeySize = c.increase2CConfigMaxKeySize.get();
 		}
 	}
 
@@ -55,7 +53,6 @@ public class FTBJanitorConfig
 		private final ForgeConfigSpec.BooleanValue cacheTomlConfigGetters;
 		private final ForgeConfigSpec.BooleanValue disableBlockStateCache;
 		private final ForgeConfigSpec.BooleanValue logNetworkErrors;
-		private final ForgeConfigSpec.BooleanValue increase2CConfigMaxKeySize;
 
 		private CommonConfig(ForgeConfigSpec.Builder builder)
 		{
@@ -78,10 +75,6 @@ public class FTBJanitorConfig
 			logNetworkErrors = builder
 					.comment("Prints network errors in normal log rather than debug")
 					.define("logNetworkErrors", false);
-
-			increase2CConfigMaxKeySize = builder
-					.comment("Default max string size in FMLHandshakeMessages.S2CConfigData class is 128, this changes it to 32767")
-					.define("increase2CConfigMaxKeySize", true);
 		}
 	}
 }

@@ -10,7 +10,6 @@
 		"MissingMappingsMixin",
 		"NetworkManagerMixin",
 		"ResourceLocationMixin",
-		"S2CConfigDataMixin",
 		"TaskMixin"
 	],
 	"client": [

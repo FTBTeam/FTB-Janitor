@@ -17,11 +17,13 @@ import net.minecraft.state.Property;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -51,6 +53,8 @@ public class FTBJanitorCommands
 		dump.then(Commands.literal("entity_brains").executes(context -> dumpEntityBrains(context.getSource())));
 		dump.then(Commands.literal("registry_keys").executes(context -> dumpRegistryKeys(context.getSource())));
 		dump.then(Commands.literal("block_states").executes(context -> dumpBlockStates(context.getSource())));
+		dump.then(Commands.literal("bad_synced_configs").executes(context -> dumpSyncedConfigs(context.getSource(), false)));
+		dump.then(Commands.literal("all_synced_configs").executes(context -> dumpSyncedConfigs(context.getSource(), true)));
 
 		if (FTBJanitorConfig.logTomlConfigGetters)
 		{
@@ -65,6 +69,24 @@ public class FTBJanitorCommands
 
 		command.then(dump);
 		event.getDispatcher().register(command);
+	}
+
+	private static int dumpSyncedConfigs(CommandSource source, boolean all)
+	{
+		if (!all)
+		{
+			source.sendFeedback(new StringTextComponent("Bad Config keys (size > 128):"), false);
+		}
+
+		ConfigTracker.INSTANCE.syncConfigs(false).forEach(stringS2CConfigDataPair -> {
+			if (all || stringS2CConfigDataPair.getKey().length() > 128)
+			{
+				source.sendFeedback(new StringTextComponent(stringS2CConfigDataPair.getKey()).mergeStyle(stringS2CConfigDataPair.getKey().length() > 128 ? TextFormatting.RED : TextFormatting.WHITE), false);
+			}
+		});
+
+		source.sendFeedback(new StringTextComponent("Done"), false);
+		return 1;
 	}
 
 	private static int dumpEntityBrains(CommandSource source)
