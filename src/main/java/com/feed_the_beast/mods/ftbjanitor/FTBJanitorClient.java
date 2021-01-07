@@ -9,6 +9,10 @@ import net.minecraft.resources.IResourcePack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.storage.FolderName;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.InputStream;
@@ -22,6 +26,7 @@ import java.util.stream.Collectors;
 /**
  * @author LatvianModder
  */
+@Mod.EventBusSubscriber(modid = FTBJanitor.MOD_ID, value = Dist.CLIENT)
 public class FTBJanitorClient extends FTBJanitorCommon
 {
 	@Override
@@ -91,7 +96,7 @@ public class FTBJanitorClient extends FTBJanitorCommon
 			list.stream().sorted((o1, o2) -> Long.compare(o2.getValue(), o1.getValue())).forEach(p -> lines.add(p.getKey() + ": " + p.getValue()));
 			lines.add("");
 			lines.add("Resource count: " + list.size() + ", total size: " + totalSize + " bytes");
-			lines.add("Resource packs: " + manager.getResourcePackStream().map(IResourcePack::getName).collect(Collectors.joining(", ")));
+			lines.add("Resource packs: " + manager.getResourcePackStream().map(IResourcePack::getName).sorted().collect(Collectors.joining(", ")));
 
 			try
 			{
@@ -108,5 +113,14 @@ public class FTBJanitorClient extends FTBJanitorCommon
 		});
 
 		return 1;
+	}
+
+	@SubscribeEvent
+	public static void clientTick(TickEvent.ClientTickEvent event)
+	{
+		if (FTBJanitorCommands.autofly && event.phase == TickEvent.Phase.START)
+		{
+			Minecraft.getInstance().gameSettings.keyBindForward.setPressed(true);
+		}
 	}
 }

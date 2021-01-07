@@ -22,8 +22,10 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ConfigTracker;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -35,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -43,13 +46,18 @@ import java.util.Set;
 public class FTBJanitorCommands
 {
 	public static final Map<String, MutableLong> LOGGED_TOML_CONFIGS = new HashMap<>();
+	public static boolean autofly = false;
 
 	@SubscribeEvent
 	public static void registerCommands(RegisterCommandsEvent event)
 	{
 		LiteralArgumentBuilder<CommandSource> command = Commands.literal("ftbjanitor").requires(source -> source.getServer().isSinglePlayer() || source.hasPermissionLevel(2));
+
+		command.then(Commands.literal("autofly").executes(context -> autofly()));
+
 		LiteralArgumentBuilder<CommandSource> dump = Commands.literal("dump");
 
+		dump.then(Commands.literal("modlist").executes(context -> dumpModlist(context.getSource())));
 		dump.then(Commands.literal("entity_brains").executes(context -> dumpEntityBrains(context.getSource())));
 		dump.then(Commands.literal("registry_keys").executes(context -> dumpRegistryKeys(context.getSource())));
 		dump.then(Commands.literal("block_states").executes(context -> dumpBlockStates(context.getSource())));
@@ -71,6 +79,12 @@ public class FTBJanitorCommands
 		event.getDispatcher().register(command);
 	}
 
+	private static int autofly()
+	{
+		autofly = !autofly;
+		return 1;
+	}
+
 	private static int dumpSyncedConfigs(CommandSource source, boolean all)
 	{
 		if (!all)
@@ -86,6 +100,12 @@ public class FTBJanitorCommands
 		});
 
 		source.sendFeedback(new StringTextComponent("Done"), false);
+		return 1;
+	}
+
+	private static int dumpModlist(CommandSource source)
+	{
+		source.sendFeedback(new StringTextComponent("Mods:\n" + ModList.get().getMods().stream().map(ModInfo::getModId).sorted().collect(Collectors.joining("\n"))), true);
 		return 1;
 	}
 
