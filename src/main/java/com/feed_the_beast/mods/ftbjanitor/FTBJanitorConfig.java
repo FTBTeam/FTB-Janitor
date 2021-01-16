@@ -16,6 +16,7 @@ public class FTBJanitorConfig
 	public static boolean logTomlConfigGetters;
 	public static boolean cacheTomlConfigGetters;
 	public static boolean logNetworkErrors;
+	public static boolean disableRecipeShrinking;
 
 	private static Pair<CommonConfig, ForgeConfigSpec> common;
 
@@ -41,6 +42,7 @@ public class FTBJanitorConfig
 			logTomlConfigGetters = c.logTomlConfigGetters.get();
 			cacheTomlConfigGetters = c.cacheTomlConfigGetters.get();
 			logNetworkErrors = c.logNetworkErrors.get();
+			disableRecipeShrinking = c.disableRecipeShrinking.get();
 		}
 	}
 
@@ -50,6 +52,7 @@ public class FTBJanitorConfig
 		private final ForgeConfigSpec.BooleanValue logTomlConfigGetters;
 		private final ForgeConfigSpec.BooleanValue cacheTomlConfigGetters;
 		private final ForgeConfigSpec.BooleanValue logNetworkErrors;
+		private final ForgeConfigSpec.BooleanValue disableRecipeShrinking;
 
 		private CommonConfig(ForgeConfigSpec.Builder builder)
 		{
@@ -68,6 +71,10 @@ public class FTBJanitorConfig
 			logNetworkErrors = builder
 					.comment("Prints network errors in normal log rather than debug")
 					.define("logNetworkErrors", false);
+
+			disableRecipeShrinking = builder
+					.comment("Vanilla shrinks recipe patterns to try to optimise them, but it's sometimes breaking some modded recipes")
+					.define("disableRecipeShrinking", false);
 		}
 	}
 }

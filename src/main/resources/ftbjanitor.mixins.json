@@ -9,6 +9,7 @@
 		"MissingMappingsMixin",
 		"NetworkManagerMixin",
 		"ResourceLocationMixin",
+		"ShapedRecipeMixin",
 		"TaskMixin"
 	],
 	"client": [
