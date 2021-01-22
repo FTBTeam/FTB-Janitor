@@ -83,12 +83,14 @@ minecraft {
 
 repositories {
 	mavenLocal()
-	// maven { url = "https://www.cursemaven.com" }
+	maven { url = "https://www.cursemaven.com" }
 }
 
 dependencies {
 	minecraft "net.minecraftforge:forge:${forge_version}"
-	// compile fg.deobf("curse.maven:rhino:${rhino_file}")
+	compile fg.deobf("curse.maven:jei-238222:3157864")
+	compile fg.deobf("curse.maven:just-enough-resources-jer-240630:3166519")
+
 }
 
 jar {
@@ -118,21 +120,6 @@ if (ENV.LOCAL_MAVEN) {
 			mavenDeployer {
 				repository(url: "file://${ENV.LOCAL_MAVEN}")
 			}
-		}
-	}
-}
-
-if (ENV.CURSEFORGE_KEY) {
-	curseforge {
-		apiKey = ENV.CURSEFORGE_KEY
-		project {
-			id = project.curseforge_id
-			releaseType = "release"
-			addGameVersion "1.16.2"
-			addGameVersion "1.16.3"
-			addGameVersion "1.16.4"
-			changelog = getGitChangelog
-			changelogType = 'markdown'
 		}
 	}
 }
