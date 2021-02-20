@@ -1,0 +1,30 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:water",
+		"minecraft:lava",
+		"#minecraft:base_stone_overworld",
+		"#minecraft:base_stone_nether",
+		"#forge:stone",
+		"#forge:cobblestone",
+		"#forge:dirt",
+		"#forge:sand",
+		"#forge:gravel",
+		"#minecraft:wool",
+		"#forge:obsidian",
+		"#minecraft:flowers",
+		"#minecraft:saplings",
+		"#minecraft:ice",
+		"#minecraft:corals",
+		"#minecraft:fire",
+		"#forge:sandstone",
+		"#minecraft:planks",
+		"#minecraft:logs",
+		"#forge:sandstone",
+		"#minecraft:rails",
+		"#minecraft:leaves",
+		"minecraft:vine",
+		"minecraft:grass",
+		"minecraft:tall_grass"
+	]
+}

@@ -2,6 +2,7 @@ package com.feed_the_beast.mods.ftbjanitor;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.minecraft.block.AirBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.loot.LootContext;
@@ -100,7 +101,7 @@ public class JERScanner implements Runnable
 							{
 								BlockState state = chunk.getBlockState(new BlockPos(cx * 16 + bx, by, cz * 16 + bz));
 
-								if (whitelist.contains(state.getBlock()))
+								if (!(state.getBlock() instanceof AirBlock) && whitelist.contains(state.getBlock()))
 								{
 									data.distribution[by].computeIfAbsent(state.getBlock(), BLOCK_TO_COUNT_FUNCTION).increment();
 								}
