@@ -11,13 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * @author LatvianModder
  */
 @Mixin(ResourceLocation.class)
-public class ResourceLocationMixin
-{
+public class ResourceLocationMixin {
 	@Inject(method = {"validatePathChar", "validateNamespaceChar"}, at = @At("HEAD"), cancellable = true)
-	private static void validateCharFTBJ(char charValue, CallbackInfoReturnable<Boolean> ci)
-	{
-		if (FTBJanitor.ignoreResourceLocationErrors)
-		{
+	private static void validateCharFTBJ(char charValue, CallbackInfoReturnable<Boolean> ci) {
+		if (FTBJanitor.ignoreResourceLocationErrors) {
 			ci.setReturnValue(true);
 		}
 	}

@@ -1,5 +1,6 @@
 package com.feed_the_beast.mods.ftbjanitor;
 
+import com.feed_the_beast.mods.ftbjanitor.command.FTBJanitorCommands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandSource;
@@ -27,16 +28,13 @@ import java.util.stream.Collectors;
  * @author LatvianModder
  */
 @Mod.EventBusSubscriber(modid = FTBJanitor.MOD_ID, value = Dist.CLIENT)
-public class FTBJanitorClient extends FTBJanitorCommon
-{
+public class FTBJanitorClient extends FTBJanitorCommon {
 	@Override
-	public void registerCommands(LiteralArgumentBuilder<CommandSource> command, LiteralArgumentBuilder<CommandSource> dump)
-	{
+	public void registerCommands(LiteralArgumentBuilder<CommandSource> command, LiteralArgumentBuilder<CommandSource> dump) {
 		dump.then(Commands.literal("client_resources").executes(context -> dumpClientResources(context.getSource())));
 	}
 
-	private int dumpClientResources(CommandSource source)
-	{
+	private int dumpClientResources(CommandSource source) {
 		Minecraft.getInstance().execute(() -> {
 			List<Pair<ResourceLocation, Long>> list = new ArrayList<>();
 			long totalSize = 0L;
@@ -47,8 +45,7 @@ public class FTBJanitorClient extends FTBJanitorCommon
 			LinkedHashSet<ResourceLocation> locations = new LinkedHashSet<>();
 			FTBJanitor.ignoreResourceLocationErrors = true;
 
-			try
-			{
+			try {
 				locations.addAll(manager.getAllResourceLocations(".", s -> true));
 				locations.addAll(manager.getAllResourceLocations("textures", s -> true));
 				locations.addAll(manager.getAllResourceLocations("font", s -> true));
@@ -59,31 +56,24 @@ public class FTBJanitorClient extends FTBJanitorCommon
 				locations.addAll(manager.getAllResourceLocations("shaders", s -> true));
 				locations.addAll(manager.getAllResourceLocations("texts", s -> true));
 				locations.addAll(manager.getAllResourceLocations("sounds", s -> true));
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 
 			FTBJanitor.ignoreResourceLocationErrors = false;
 
-			for (ResourceLocation res : locations)
-			{
+			for (ResourceLocation res : locations) {
 				long size = 0L;
 
-				try (InputStream stream = manager.getResource(res).getInputStream())
-				{
+				try (InputStream stream = manager.getResource(res).getInputStream()) {
 					int i;
 
-					do
-					{
+					do {
 						i = stream.read(buffer);
 						size += i;
 					}
 					while (i > 0);
-				}
-				catch (Exception ex)
-				{
+				} catch (Exception ex) {
 					size = 0L;
 				}
 
@@ -98,14 +88,11 @@ public class FTBJanitorClient extends FTBJanitorCommon
 			lines.add("Resource count: " + list.size() + ", total size: " + totalSize + " bytes");
 			lines.add("Resource packs: " + manager.getResourcePackStream().map(IResourcePack::getName).sorted().collect(Collectors.joining(", ")));
 
-			try
-			{
+			try {
 				String filename = "client-resource-dump-" + Instant.now().toString().replaceAll("[:T]", "-") + ".txt";
 				Files.write(source.getServer().func_240776_a_(FolderName.DOT).resolve(filename), lines);
 				source.sendFeedback(new StringTextComponent("Client resource dump saved as " + filename), true);
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 
@@ -116,10 +103,8 @@ public class FTBJanitorClient extends FTBJanitorCommon
 	}
 
 	@SubscribeEvent
-	public static void clientTick(TickEvent.ClientTickEvent event)
-	{
-		if (FTBJanitorCommands.autofly && event.phase == TickEvent.Phase.START)
-		{
+	public static void clientTick(TickEvent.ClientTickEvent event) {
+		if (FTBJanitorCommands.autofly && event.phase == TickEvent.Phase.START) {
 			Minecraft.getInstance().gameSettings.keyBindForward.setPressed(true);
 		}
 	}

@@ -15,11 +15,9 @@ import java.util.concurrent.CompletableFuture;
  * @author LatvianModder
  */
 @Mixin(AudioStreamManager.class)
-public class AudioStreamManagerMixin
-{
+public class AudioStreamManagerMixin {
 	@Inject(method = "preload", at = @At("RETURN"))
-	private void preloadFTBJ(Collection<Sound> sounds, CallbackInfoReturnable<CompletableFuture<?>> cir)
-	{
+	private void preloadFTBJ(Collection<Sound> sounds, CallbackInfoReturnable<CompletableFuture<?>> cir) {
 		StartupMessageManager.mcLoaderConsumer().ifPresent(c -> c.accept("Sound Engine Loaded"));
 	}
 }

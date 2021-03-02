@@ -17,8 +17,7 @@ import java.util.stream.Collectors;
  * @author LatvianModder
  */
 @Mixin(RegistryEvent.MissingMappings.class)
-public class MissingMappingsMixin<T extends IForgeRegistryEntry<T>>
-{
+public class MissingMappingsMixin<T extends IForgeRegistryEntry<T>> {
 	@Shadow(remap = false)
 	@Final
 	private ImmutableList<RegistryEvent.MissingMappings.Mapping<T>> mappings;
@@ -27,14 +26,10 @@ public class MissingMappingsMixin<T extends IForgeRegistryEntry<T>>
 	private ModContainer activeMod;
 
 	@Inject(method = "getMappings", at = @At("HEAD"), remap = false, cancellable = true)
-	public void getMappingsFTBJ(CallbackInfoReturnable<ImmutableList<RegistryEvent.MissingMappings.Mapping<T>>> ci)
-	{
-		if (mappings.isEmpty() || activeMod == null)
-		{
+	public void getMappingsFTBJ(CallbackInfoReturnable<ImmutableList<RegistryEvent.MissingMappings.Mapping<T>>> ci) {
+		if (mappings.isEmpty() || activeMod == null) {
 			ci.setReturnValue(ImmutableList.of());
-		}
-		else
-		{
+		} else {
 			ci.setReturnValue(ImmutableList.copyOf(mappings.stream().filter(e -> e.key != null && e.key.getNamespace().equals(activeMod.getModId())).collect(Collectors.toList())));
 		}
 	}

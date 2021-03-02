@@ -7,8 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
  * @author LatvianModder
  */
 @Mixin(AtlasTexture.class)
-public class AtlasTextureMixin
-{
+public class AtlasTextureMixin {
 	/*
 	@Inject(method = "loadSprite", at = @At(value = "NEW", target = "net/minecraft/client/renderer/texture/TextureAtlasSprite", shift = At.Shift.BEFORE), locals = LocalCapture.PRINT)
 	private void loadSpriteFTBJ(IResourceManager resourceManagerIn, TextureAtlasSprite.Info spriteInfoIn, int widthIn, int heightIn, int mipmapLevelIn, int originX, int originY, CallbackInfoReturnable<TextureAtlasSprite> cir, ResourceLocation resourceLocation, IResource resource, NativeImage image)

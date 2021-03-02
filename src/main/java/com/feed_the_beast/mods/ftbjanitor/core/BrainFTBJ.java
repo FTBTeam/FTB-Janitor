@@ -10,7 +10,6 @@ import java.util.Set;
 /**
  * @author LatvianModder
  */
-public interface BrainFTBJ<E extends LivingEntity>
-{
+public interface BrainFTBJ<E extends LivingEntity> {
 	Map<Integer, Map<Activity, Set<Task<? super E>>>> getTaskPriorityMapFTBJ();
 }

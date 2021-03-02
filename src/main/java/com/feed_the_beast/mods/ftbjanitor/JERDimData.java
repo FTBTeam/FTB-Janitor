@@ -9,14 +9,12 @@ import java.util.HashMap;
 /**
  * @author LatvianModder
  */
-public class JERDimData
-{
+public class JERDimData {
 	public final JERScanner scanner;
 	public final ServerWorld dimension;
 	public HashMap<Block, MutableLong>[] distribution;
 
-	public JERDimData(JERScanner s, ServerWorld w)
-	{
+	public JERDimData(JERScanner s, ServerWorld w) {
 		scanner = s;
 		dimension = w;
 	}

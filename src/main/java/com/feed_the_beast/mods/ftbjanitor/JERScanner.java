@@ -16,20 +16,14 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.lang3.mutable.MutableLong;
 
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
  * @author LatvianModder
  */
-public class JERScanner implements Runnable
-{
+public class JERScanner implements Runnable {
 	private static final Function<Block, MutableLong> BLOCK_TO_COUNT_FUNCTION = k -> new MutableLong(0L);
 
 	public static JERScanner current;
@@ -43,8 +37,7 @@ public class JERScanner implements Runnable
 	public long blocksScanned;
 	public Consumer<ITextComponent> callback;
 
-	public JERScanner(int h, int r, int sx, int sz, Set<Block> w)
-	{
+	public JERScanner(int h, int r, int sx, int sz, Set<Block> w) {
 		dimensions = new ArrayList<>();
 		height = h;
 		radius = r;
@@ -56,34 +49,27 @@ public class JERScanner implements Runnable
 	}
 
 	@Override
-	public void run()
-	{
+	public void run() {
 		long diameter = 1L + radius * 2L;
 		long area = diameter * diameter;
 		long blocks = area * 256L;
 		long progress = 0L;
 		long percent = 0L;
 
-		for (JERDimData data : dimensions)
-		{
-			if (stop)
-			{
+		for (JERDimData data : dimensions) {
+			if (stop) {
 				return;
 			}
 
 			data.distribution = new HashMap[height];
 
-			for (int i = 0; i < height; i++)
-			{
+			for (int i = 0; i < height; i++) {
 				data.distribution[i] = new HashMap<>();
 			}
 
-			for (int x = -radius; x <= radius; x++)
-			{
-				for (int z = -radius; z <= radius; z++)
-				{
-					if (stop)
-					{
+			for (int x = -radius; x <= radius; x++) {
+				for (int z = -radius; z <= radius; z++) {
+					if (stop) {
 						return;
 					}
 
@@ -91,18 +77,14 @@ public class JERScanner implements Runnable
 					int cz = startZ + z;
 					Chunk chunk = data.dimension.getChunk(cx, cz);
 
-					for (int bx = 0; bx < 16; bx++)
-					{
-						for (int bz = 0; bz < 16; bz++)
-						{
+					for (int bx = 0; bx < 16; bx++) {
+						for (int bz = 0; bz < 16; bz++) {
 							int h = Math.min(height, chunk.getHeightmap(Heightmap.Type.MOTION_BLOCKING).getHeight(bx, bz));
 
-							for (int by = 0; by < h; by++)
-							{
+							for (int by = 0; by < h; by++) {
 								BlockState state = chunk.getBlockState(new BlockPos(cx * 16 + bx, by, cz * 16 + bz));
 
-								if (!(state.getBlock() instanceof AirBlock) && whitelist.contains(state.getBlock()))
-								{
+								if (!(state.getBlock() instanceof AirBlock) && whitelist.contains(state.getBlock())) {
 									data.distribution[by].computeIfAbsent(state.getBlock(), BLOCK_TO_COUNT_FUNCTION).increment();
 								}
 
@@ -116,37 +98,30 @@ public class JERScanner implements Runnable
 					long p = percent;
 					percent = progress * 1000L / (blocks * dimensions.size());
 
-					if (p != percent)
-					{
+					if (p != percent) {
 						callback.accept(new StringTextComponent("JER Scanner is running [" + (percent / 10D) + "%]"));
 					}
 				}
 			}
 		}
 
-		if (!stop)
-		{
+		if (!stop) {
 			JsonArray array = new JsonArray();
 
-			for (JERDimData data : dimensions)
-			{
+			for (JERDimData data : dimensions) {
 				Set<Block> dimBlocks = new HashSet<>();
 
-				for (int y = 0; y < height; y++)
-				{
+				for (int y = 0; y < height; y++) {
 					dimBlocks.addAll(data.distribution[y].keySet());
 				}
 
 				LootContext.Builder lootContext = new LootContext.Builder(data.dimension).withRandom(data.dimension.rand).withLuck(1F);
 
-				for (Block block : dimBlocks)
-				{
+				for (Block block : dimBlocks) {
 					StringBuilder sb = new StringBuilder();
 
-					for (int y = 0; y < height; y++)
-					{
-						if (y > 0)
-						{
+					for (int y = 0; y < height; y++) {
+						if (y > 0) {
 							sb.append(';');
 						}
 
@@ -166,12 +141,9 @@ public class JERScanner implements Runnable
 				}
 			}
 
-			try
-			{
+			try {
 				Files.write(FMLPaths.CONFIGDIR.get().resolve("world-gen.json"), Collections.singleton(array.toString()));
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
@@ -179,8 +151,7 @@ public class JERScanner implements Runnable
 		current = null;
 	}
 
-	public void stop()
-	{
+	public void stop() {
 		stop = true;
 	}
 }

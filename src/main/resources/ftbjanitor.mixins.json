@@ -5,7 +5,8 @@
 	"refmap": "ftbjanitor.refmap.json",
 	"mixins": [
 		"BrainMixin",
-		"ConfigValueMixin",
+		"CommandsMixin",
+		"MinecraftServerMixin",
 		"MissingMappingsMixin",
 		"NetworkManagerMixin",
 		"ResourceLocationMixin",

@@ -13,8 +13,7 @@ import java.util.Map;
  * @author LatvianModder
  */
 @Mixin(Task.class)
-public abstract class TaskMixin implements TaskFTBJ
-{
+public abstract class TaskMixin implements TaskFTBJ {
 	@Override
 	@Accessor("requiredMemoryState")
 	public abstract Map<MemoryModuleType<?>, MemoryModuleStatus> getRequiredMemoryStateFTBJ();

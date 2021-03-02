@@ -11,13 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * @author LatvianModder
  */
 @Mixin(ShapedRecipe.class)
-public class ShapedRecipeMixin
-{
+public class ShapedRecipeMixin {
 	@Inject(method = "shrink", at = @At("HEAD"), cancellable = true)
-	private static void shrinkFTBJ(String[] in, CallbackInfoReturnable<String[]> ci)
-	{
-		if (FTBJanitorConfig.disableRecipeShrinking)
-		{
+	private static void shrinkFTBJ(String[] in, CallbackInfoReturnable<String[]> ci) {
+		if (FTBJanitorConfig.disableRecipeShrinking) {
 			ci.setReturnValue(in);
 		}
 	}

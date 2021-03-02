@@ -15,8 +15,7 @@ import java.util.Locale;
  * @author LatvianModder
  */
 @Mod(FTBJanitor.MOD_ID)
-public class FTBJanitor
-{
+public class FTBJanitor {
 	public static final String MOD_ID = "ftbjanitor";
 	public static final String MOD_NAME = "FTB Janitor";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
@@ -24,8 +23,7 @@ public class FTBJanitor
 
 	public static boolean ignoreResourceLocationErrors = false;
 
-	public FTBJanitor()
-	{
+	public FTBJanitor() {
 		Locale.setDefault(Locale.US);
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 		FTBJanitorConfig.init();

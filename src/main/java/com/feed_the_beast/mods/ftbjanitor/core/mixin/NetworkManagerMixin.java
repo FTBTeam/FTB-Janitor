@@ -18,19 +18,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @author LatvianModder
  */
 @Mixin(NetworkManager.class)
-public abstract class NetworkManagerMixin
-{
+public abstract class NetworkManagerMixin {
 	@Inject(method = "exceptionCaught", at = @At("HEAD"))
-	private void exceptionCaughtFTBJ(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci)
-	{
-		if (FTBJanitorConfig.logNetworkErrors && !(throwable instanceof TimeoutException) && !(throwable instanceof SkipableEncoderException))
-		{
-			if (getNetHandler() instanceof ServerPlayNetHandler)
-			{
+	private void exceptionCaughtFTBJ(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
+		if (FTBJanitorConfig.logNetworkErrors && !(throwable instanceof TimeoutException) && !(throwable instanceof SkipableEncoderException)) {
+			if (getNetHandler() instanceof ServerPlayNetHandler) {
 				FTBJanitor.LOGGER.info("Internal network in " + context.name() + " / ServerPlayer Handler (" + ((ServerPlayNetHandler) getNetHandler()).player.getScoreboardName() + ")");
-			}
-			else
-			{
+			} else {
 				FTBJanitor.LOGGER.info("Internal network in " + context.name() + " / " + getNetHandler().getClass().getName());
 			}
 

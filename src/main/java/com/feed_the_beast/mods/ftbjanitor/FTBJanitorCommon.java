@@ -6,9 +6,7 @@ import net.minecraft.command.CommandSource;
 /**
  * @author LatvianModder
  */
-public class FTBJanitorCommon
-{
-	public void registerCommands(LiteralArgumentBuilder<CommandSource> command, LiteralArgumentBuilder<CommandSource> dump)
-	{
+public class FTBJanitorCommon {
+	public void registerCommands(LiteralArgumentBuilder<CommandSource> command, LiteralArgumentBuilder<CommandSource> dump) {
 	}
 }

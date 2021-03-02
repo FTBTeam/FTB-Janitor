@@ -8,7 +8,6 @@ import java.util.Map;
 /**
  * @author LatvianModder
  */
-public interface TaskFTBJ
-{
+public interface TaskFTBJ {
 	Map<MemoryModuleType<?>, MemoryModuleStatus> getRequiredMemoryStateFTBJ();
 }

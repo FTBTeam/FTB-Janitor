@@ -15,8 +15,7 @@ import java.util.Set;
  * @author LatvianModder
  */
 @Mixin(Brain.class)
-public abstract class BrainMixin<E extends LivingEntity> implements BrainFTBJ<E>
-{
+public abstract class BrainMixin<E extends LivingEntity> implements BrainFTBJ<E> {
 	@Override
 	@Accessor("taskPriorityMap")
 	public abstract Map<Integer, Map<Activity, Set<Task<? super E>>>> getTaskPriorityMapFTBJ();
