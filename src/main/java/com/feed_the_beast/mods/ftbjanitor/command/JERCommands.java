@@ -7,19 +7,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.TagCollectionManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.Util;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.SerializationTags;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.Reader;
@@ -33,7 +33,7 @@ import java.util.Set;
  * @author LatvianModder
  */
 public class JERCommands {
-	public static void register(LiteralArgumentBuilder<CommandSource> command) {
+	public static void register(LiteralArgumentBuilder<CommandSourceStack> command) {
 		command.then(Commands.literal("jer_worldgen")
 				.then(Commands.literal("start")
 						.executes(context -> jerStart(context.getSource()))
@@ -44,9 +44,9 @@ public class JERCommands {
 		);
 	}
 
-	private static int jerStart(CommandSource source) {
+	private static int jerStart(CommandSourceStack source) {
 		if (JERScanner.current != null) {
-			source.sendFeedback(new StringTextComponent("JER Scanner is already running!"), false);
+			source.sendSuccess(new TextComponent("JER Scanner is already running!"), false);
 			return 0;
 		}
 
@@ -62,8 +62,8 @@ public class JERCommands {
 
 				JsonObject dimensions = new JsonObject();
 
-				for (ServerWorld world : source.getServer().getWorlds()) {
-					dimensions.addProperty(world.getDimensionKey().getLocation().toString(), true);
+				for (ServerLevel world : source.getServer().getAllLevels()) {
+					dimensions.addProperty(world.dimension().location().toString(), true);
 				}
 
 				json.add("dimensions", dimensions);
@@ -72,7 +72,7 @@ public class JERCommands {
 				json.addProperty("scan_radius", 25);
 
 				Files.write(config, Collections.singleton(new GsonBuilder().setPrettyPrinting().create().toJson(json)));
-				source.sendFeedback(new StringTextComponent("config/jer-world-gen-config.json created! After you've configured it, run this command again!"), false);
+				source.sendSuccess(new TextComponent("config/jer-world-gen-config.json created! After you've configured it, run this command again!"), false);
 				return 0;
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -81,10 +81,10 @@ public class JERCommands {
 			try (Reader reader = Files.newBufferedReader(config)) {
 				JsonObject json = new GsonBuilder().setLenient().create().fromJson(reader, JsonObject.class);
 
-				int height = MathHelper.clamp(json.get("height").getAsInt(), 16, 256);
-				int radius = MathHelper.clamp(json.get("scan_radius").getAsInt(), 1, 200);
-				int startX = MathHelper.floor(source.getPos().x) >> 4;
-				int startZ = MathHelper.floor(source.getPos().z) >> 4;
+				int height = Mth.clamp(json.get("height").getAsInt(), 16, 256);
+				int radius = Mth.clamp(json.get("scan_radius").getAsInt(), 1, 200);
+				int startX = Mth.floor(source.getPosition().x) >> 4;
+				int startZ = Mth.floor(source.getPosition().z) >> 4;
 
 				Set<Block> blocks = new HashSet<>();
 
@@ -92,13 +92,13 @@ public class JERCommands {
 					String s = e.getAsString();
 
 					if (s.startsWith("#")) {
-						ITag<Block> tag = TagCollectionManager.getManager().getBlockTags().get(new ResourceLocation(s.substring(1)));
+						Tag<Block> tag = SerializationTags.getInstance().getBlocks().getTag(new ResourceLocation(s.substring(1)));
 
 						if (tag != null) {
-							blocks.addAll(tag.getAllElements());
+							blocks.addAll(tag.getValues());
 						}
 					} else {
-						blocks.add(Registry.BLOCK.getOrDefault(new ResourceLocation(s)));
+						blocks.add(Registry.BLOCK.get(new ResourceLocation(s)));
 					}
 				}
 
@@ -108,8 +108,8 @@ public class JERCommands {
 
 				JsonObject dimensions = json.get("dimensions").getAsJsonObject();
 
-				for (ServerWorld world : source.getServer().getWorlds()) {
-					String id = world.getDimensionKey().getLocation().toString();
+				for (ServerLevel world : source.getServer().getAllLevels()) {
+					String id = world.dimension().location().toString();
 
 					if (dimensions.has(id) && dimensions.get(id).getAsBoolean()) {
 						JERScanner.current.dimensions.add(new JERDimData(JERScanner.current, world));
@@ -118,15 +118,15 @@ public class JERCommands {
 
 				JERScanner.current.stop = false;
 
-				if (source.getEntity() instanceof PlayerEntity) {
-					PlayerEntity p = (PlayerEntity) source.getEntity();
-					JERScanner.current.callback = text -> p.sendStatusMessage(text, true);
+				if (source.getEntity() instanceof Player) {
+					Player p = (Player) source.getEntity();
+					JERScanner.current.callback = text -> p.displayClientMessage(text, true);
 				} else {
-					JERScanner.current.callback = text -> source.sendFeedback(text, false);
+					JERScanner.current.callback = text -> source.sendSuccess(text, false);
 				}
 
-				Util.getRenderingService().execute(JERScanner.current);
-				source.sendFeedback(new StringTextComponent("JER Scanner started!"), false);
+				Util.ioPool().execute(JERScanner.current);
+				source.sendSuccess(new TextComponent("JER Scanner started!"), false);
 				return 1;
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -136,14 +136,14 @@ public class JERCommands {
 		return 0;
 	}
 
-	private static int jerStop(CommandSource source) {
+	private static int jerStop(CommandSourceStack source) {
 		if (JERScanner.current != null) {
 			JERScanner.current.stop();
 			JERScanner.current = null;
-			source.sendFeedback(new StringTextComponent("JER Scanner stopped!"), false);
+			source.sendSuccess(new TextComponent("JER Scanner stopped!"), false);
 			return 1;
 		} else {
-			source.sendErrorMessage(new StringTextComponent("JER Scanner isn't running!"));
+			source.sendFailure(new TextComponent("JER Scanner isn't running!"));
 			return 0;
 		}
 	}

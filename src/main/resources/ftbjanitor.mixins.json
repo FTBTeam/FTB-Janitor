@@ -4,18 +4,15 @@
 	"compatibilityLevel": "JAVA_8",
 	"refmap": "ftbjanitor.refmap.json",
 	"mixins": [
+		"BehaviorMixin",
 		"BrainMixin",
 		"CommandsMixin",
 		"MinecraftServerMixin",
-		"MissingMappingsMixin",
 		"NetworkManagerMixin",
 		"ResourceLocationMixin",
-		"ShapedRecipeMixin",
-		"TaskMixin"
+		"ShapedRecipeMixin"
 	],
 	"client": [
-		"AtlasTextureMixin",
-		"AudioStreamManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

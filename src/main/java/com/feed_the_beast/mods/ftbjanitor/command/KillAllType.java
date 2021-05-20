@@ -1,9 +1,10 @@
 package com.feed_the_beast.mods.ftbjanitor.command;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Predicate;
 
@@ -12,11 +13,11 @@ import java.util.function.Predicate;
  */
 public enum KillAllType {
 	ALL("all", entity -> true),
-	DEFAULT("default", entity -> entity instanceof ItemEntity || entity instanceof ExperienceOrbEntity || !(entity instanceof PlayerEntity)),
-	LIVING("living", entity -> entity instanceof PlayerEntity),
-	NON_LIVING("non_living", entity -> entity instanceof PlayerEntity),
-	ITEMS("items", entity -> entity instanceof PlayerEntity),
-	XP_ORBS("xp_orbs", entity -> entity instanceof PlayerEntity),
+	DEFAULT("default", entity -> entity instanceof LivingEntity && !(entity instanceof Player)),
+	LIVING("living", entity -> entity instanceof LivingEntity),
+	NON_LIVING("non_living", entity -> entity instanceof Player),
+	ITEMS("items", entity -> entity instanceof ItemEntity),
+	XP_ORBS("xp_orbs", entity -> entity instanceof ExperienceOrb),
 
 	;
 

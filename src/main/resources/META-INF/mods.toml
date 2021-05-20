@@ -1,17 +1,16 @@
 modLoader = "javafml"
 loaderVersion = "[32,)"
 issueTrackerURL = "https://github.com/FTBTeam/FTB-Janitor/issues"
-license = "GNU LGPLv3"
+license = "All Rights Reserved"
 
 [[mods]]
 modId = "ftbjanitor"
-version = "${file.jarVersion}"
+version = "${version}"
 displayName = "FTB Janitor"
 authors = "LatvianModder"
 description = '''
 Cleans up logs and fixes some bugs
 '''
-license = "All Rights Reserved"
 
 [[dependencies.ftbjanitor]]
 modId = "forge"

@@ -4,24 +4,24 @@ import com.feed_the_beast.mods.ftbjanitor.FTBJanitor;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.block.AirBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.IServerWorldInfo;
+import net.minecraft.tags.Tag;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AirBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -34,12 +34,12 @@ import java.util.List;
  */
 @Mod.EventBusSubscriber(modid = FTBJanitor.MOD_ID)
 public class FTBJanitorCommands {
-	public static final ITag<Block> CLEAR_AREA_TAG = BlockTags.makeWrapperTag("ftbjanitor:clear_area");
+	public static final Tag<Block> CLEAR_AREA_TAG = BlockTags.bind("ftbjanitor:clear_area");
 	public static boolean autofly = false;
 
 	@SubscribeEvent
 	public static void registerCommands(RegisterCommandsEvent event) {
-		LiteralArgumentBuilder<CommandSource> command = Commands.literal("ftbjanitor").requires(source -> source.getServer().isSinglePlayer() || source.hasPermissionLevel(2));
+		LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("ftbjanitor").requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2));
 
 		command.then(Commands.literal("autofly").executes(context -> autofly()));
 
@@ -50,7 +50,7 @@ public class FTBJanitorCommands {
 				)
 		);
 
-		command.then(Commands.literal("heal").executes(context -> heal(context.getSource().asPlayer())));
+		command.then(Commands.literal("heal").executes(context -> heal(context.getSource().getPlayerOrException())));
 		command.then(Commands.literal("clear_area_from_tag")
 				.executes(context -> clearArea(context.getSource(), 30, false, true))
 				.then(Commands.argument("radius", IntegerArgumentType.integer(3, 200))
@@ -71,12 +71,12 @@ public class FTBJanitorCommands {
 				)
 		);
 
-		LiteralArgumentBuilder<CommandSource> dump = Commands.literal("dump");
+		LiteralArgumentBuilder<CommandSourceStack> dump = Commands.literal("dump");
 
 		JERCommands.register(command);
 		DumpCommands.register(dump);
 
-		if (event.getEnvironment() != Commands.EnvironmentType.DEDICATED) {
+		if (event.getEnvironment() != Commands.CommandSelection.DEDICATED) {
 			FTBJanitor.proxy.registerCommands(command, dump);
 		}
 
@@ -89,15 +89,15 @@ public class FTBJanitorCommands {
 		return 1;
 	}
 
-	private static int devEnv(CommandSource source, boolean envValue) {
+	private static int devEnv(CommandSourceStack source, boolean envValue) {
 		MinecraftServer s = source.getServer();
 
-		s.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(envValue, s);
-		s.getGameRules().get(GameRules.DO_MOB_SPAWNING).set(envValue, s);
-		s.getGameRules().get(GameRules.DO_WEATHER_CYCLE).set(envValue, s);
+		s.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(envValue, s);
+		s.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(envValue, s);
+		s.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(envValue, s);
 
 		if (envValue) {
-			IServerWorldInfo info = (IServerWorldInfo) source.getWorld().getWorldInfo();
+			ServerLevelData info = (ServerLevelData) source.getLevel().getLevelData();
 			info.setDayTime(6000);
 			info.setClearWeatherTime(2000000);
 			info.setRainTime(0);
@@ -109,48 +109,48 @@ public class FTBJanitorCommands {
 		return 1;
 	}
 
-	private static int heal(ServerPlayerEntity player) {
+	private static int heal(ServerPlayer player) {
 		player.setHealth((player.getMaxHealth()));
-		player.getFoodStats().addStats(20, 20);
+		player.getFoodData().eat(20, 20F);
 		return 1;
 	}
 
-	private static int clearArea(CommandSource source, int radius, boolean keepStructures, boolean useTag) {
-		source.sendFeedback(new StringTextComponent("Clearing area, expect lag..."), false);
+	private static int clearArea(CommandSourceStack source, int radius, boolean keepStructures, boolean useTag) {
+		source.sendSuccess(new TextComponent("Clearing area, expect lag..."), false);
 
-		ServerWorld world = source.getWorld();
-		BlockPos pos = new BlockPos(source.getPos());
-		BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+		ServerLevel world = source.getLevel();
+		BlockPos pos = new BlockPos(source.getPosition());
+		BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-		List<Structure<?>> structures = new ArrayList<>();
+		List<StructureFeature<?>> structures = new ArrayList<>();
 
-		for (Structure<?> s : Registry.STRUCTURE_FEATURE) {
+		for (StructureFeature<?> s : Registry.STRUCTURE_FEATURE) {
 			structures.add(s);
 		}
 
 		for (int x = pos.getX() - radius; x <= pos.getX() + radius; x++) {
 			for (int z = pos.getZ() - radius; z <= pos.getZ() + radius; z++) {
-				int h = world.getHeight(Heightmap.Type.MOTION_BLOCKING, x, z);
+				int h = world.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
 
 				for (int y = 0; y < h; y++) {
-					mutablePos.setPos(x, y, z);
+					mutablePos.set(x, y, z);
 
 					if (!keepStructures || !isPartOfStructure(structures, world, mutablePos)) {
 						Block block = world.getBlockState(mutablePos).getBlock();
 
 						if (block != Blocks.BEDROCK && !(block instanceof AirBlock) && (useTag ? CLEAR_AREA_TAG.contains(block) : (block.getRegistryName() == null || block.getRegistryName().getNamespace().equals("minecraft")))) {
-							world.setBlockState(mutablePos, Blocks.AIR.getDefaultState(), 2);
+							world.setBlock(mutablePos, Blocks.AIR.defaultBlockState(), 2);
 						}
 					}
 				}
 			}
 		}
 
-		source.sendFeedback(new StringTextComponent("Done!"), false);
+		source.sendSuccess(new TextComponent("Done!"), false);
 		return 1;
 	}
 
-	private static boolean isPartOfStructure(List<Structure<?>> structures, World world, BlockPos pos) {
+	private static boolean isPartOfStructure(List<StructureFeature<?>> structures, Level world, BlockPos pos) {
 		if (structures.isEmpty()) {
 			return false;
 		}

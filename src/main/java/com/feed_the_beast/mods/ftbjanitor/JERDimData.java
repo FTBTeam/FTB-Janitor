@@ -1,7 +1,7 @@
 package com.feed_the_beast.mods.ftbjanitor;
 
-import net.minecraft.block.Block;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.mutable.MutableLong;
 
 import java.util.HashMap;
@@ -11,10 +11,10 @@ import java.util.HashMap;
  */
 public class JERDimData {
 	public final JERScanner scanner;
-	public final ServerWorld dimension;
+	public final ServerLevel dimension;
 	public HashMap<Block, MutableLong>[] distribution;
 
-	public JERDimData(JERScanner s, ServerWorld w) {
+	public JERDimData(JERScanner s, ServerLevel w) {
 		scanner = s;
 		dimension = w;
 	}

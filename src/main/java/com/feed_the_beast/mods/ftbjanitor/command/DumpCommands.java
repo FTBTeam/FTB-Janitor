@@ -1,26 +1,27 @@
 package com.feed_the_beast.mods.ftbjanitor.command;
 
 import com.feed_the_beast.mods.ftbjanitor.FTBJanitor;
+import com.feed_the_beast.mods.ftbjanitor.core.BehaviorFTBJ;
 import com.feed_the_beast.mods.ftbjanitor.core.BrainFTBJ;
-import com.feed_the_beast.mods.ftbjanitor.core.TaskFTBJ;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.util.UUIDTypeAdapter;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.brain.memory.MemoryModuleStatus;
-import net.minecraft.entity.ai.brain.memory.MemoryModuleType;
-import net.minecraft.entity.ai.brain.schedule.Activity;
-import net.minecraft.entity.ai.brain.task.Task;
-import net.minecraft.state.Property;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.FolderName;
+import com.sun.management.HotSpotDiagnosticMXBean;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
@@ -28,16 +29,23 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 
+import javax.management.MBeanServer;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
  */
 public class DumpCommands {
-	public static void register(LiteralArgumentBuilder<CommandSource> dump) {
+	public static void register(LiteralArgumentBuilder<CommandSourceStack> dump) {
+		dump.then(Commands.literal("heap").executes(context -> heapdump(context.getSource())));
 		dump.then(Commands.literal("modlist").executes(context -> dumpModlist(context.getSource())));
 		dump.then(Commands.literal("entity_brains").executes(context -> dumpEntityBrains(context.getSource())));
 		dump.then(Commands.literal("registry_keys").executes(context -> dumpRegistryKeys(context.getSource())));
@@ -50,28 +58,43 @@ public class DumpCommands {
 		return (T) o;
 	}
 
-	private static int dumpSyncedConfigs(CommandSource source, boolean all) {
+	private static int heapdump(CommandSourceStack source) {
+		try {
+			MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+			HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
+			String filename = "ftbjanitor-heapdump-" + System.currentTimeMillis() + ".hprof";
+			mxBean.dumpHeap(filename, true);
+			source.sendSuccess(new TextComponent("Heap dump saved: " + filename), true);
+		} catch (Throwable ex) {
+			ex.printStackTrace();
+			return 0;
+		}
+
+		return 1;
+	}
+
+	private static int dumpSyncedConfigs(CommandSourceStack source, boolean all) {
 		if (!all) {
-			source.sendFeedback(new StringTextComponent("Bad Config keys (size > 128):"), false);
+			source.sendSuccess(new TextComponent("Bad Config keys (size > 128):"), false);
 		}
 
 		ConfigTracker.INSTANCE.syncConfigs(false).forEach(stringS2CConfigDataPair -> {
 			if (all || stringS2CConfigDataPair.getKey().length() > 128) {
-				source.sendFeedback(new StringTextComponent(stringS2CConfigDataPair.getKey()).mergeStyle(stringS2CConfigDataPair.getKey().length() > 128 ? TextFormatting.RED : TextFormatting.WHITE), false);
+				source.sendSuccess(new TextComponent(stringS2CConfigDataPair.getKey()).withStyle(stringS2CConfigDataPair.getKey().length() > 128 ? ChatFormatting.RED : ChatFormatting.WHITE), false);
 			}
 		});
 
-		source.sendFeedback(new StringTextComponent("Done"), false);
+		source.sendSuccess(new TextComponent("Done"), false);
 		return 1;
 	}
 
-	private static int dumpModlist(CommandSource source) {
-		source.sendFeedback(new StringTextComponent("Mods:\n" + ModList.get().getMods().stream().map(ModInfo::getModId).sorted().collect(Collectors.joining("\n"))), true);
+	private static int dumpModlist(CommandSourceStack source) {
+		source.sendSuccess(new TextComponent("Mods:\n" + ModList.get().getMods().stream().map(ModInfo::getModId).sorted().collect(Collectors.joining("\n"))), true);
 		return 1;
 	}
 
-	private static int dumpEntityBrains(CommandSource source) {
-		source.sendFeedback(new StringTextComponent("Creating entity brain dump (this may take a while...)"), true);
+	private static int dumpEntityBrains(CommandSourceStack source) {
+		source.sendSuccess(new TextComponent("Creating entity brain dump (this may take a while...)"), true);
 
 		try {
 			String[] line = {
@@ -94,8 +117,8 @@ public class DumpCommands {
 			MutableLong entityCount = new MutableLong(0L);
 			MutableLong entityWithTasksCount = new MutableLong(0L);
 
-			for (ServerWorld world : source.getServer().getWorlds()) {
-				line[0] = world.getDimensionKey().getLocation().toString();
+			for (ServerLevel world : source.getServer().getAllLevels()) {
+				line[0] = world.dimension().location().toString();
 				dimensionCount.increment();
 
 				world.getEntities()
@@ -105,32 +128,32 @@ public class DumpCommands {
 						.forEach(entity -> {
 							entityCount.increment();
 
-							Map<Integer, Map<Activity, Set<Task<?>>>> taskPriorityMap = ((BrainFTBJ) entity.getBrain()).getTaskPriorityMapFTBJ();
+							Map<Integer, Map<Activity, Set<Behavior<?>>>> taskPriorityMap = ((BrainFTBJ) entity.getBrain()).getTaskPriorityMapFTBJ();
 
 							if (taskPriorityMap.isEmpty()) {
 								return;
 							}
 
 							entityWithTasksCount.increment();
-							line[1] = entity.getEntityString();
+							line[1] = entity.getScoreboardName();
 
 							if (line[1] == null) {
 								line[1] = entity.getClass().getName();
 							}
 
-							line[2] = UUIDTypeAdapter.fromUUID(entity.getUniqueID());
+							line[2] = UUIDTypeAdapter.fromUUID(entity.getUUID());
 
-							for (Map.Entry<Integer, Map<Activity, Set<Task<?>>>> entry : taskPriorityMap.entrySet()) {
+							for (Map.Entry<Integer, Map<Activity, Set<Behavior<?>>>> entry : taskPriorityMap.entrySet()) {
 								line[3] = entry.getKey().toString();
 
-								for (Map.Entry<Activity, Set<Task<?>>> entry1 : entry.getValue().entrySet()) {
-									line[4] = entry1.getKey().getKey();
+								for (Map.Entry<Activity, Set<Behavior<?>>> entry1 : entry.getValue().entrySet()) {
+									line[4] = entry1.getKey().getName();
 
-									for (Task<?> task : entry1.getValue()) {
+									for (Behavior<?> task : entry1.getValue()) {
 										line[5] = task.getClass().getSimpleName();
 										line[6] = task.getStatus().name().toLowerCase();
 
-										for (Map.Entry<MemoryModuleType<?>, MemoryModuleStatus> entry2 : ((TaskFTBJ) task).getRequiredMemoryStateFTBJ().entrySet()) {
+										for (Map.Entry<MemoryModuleType<?>, MemoryStatus> entry2 : ((BehaviorFTBJ) task).getRequiredMemoryStateFTBJ().entrySet()) {
 											line[7] = entry2.getKey().toString();
 											line[8] = entry2.getValue().name().toLowerCase();
 											print(lines, line);
@@ -141,14 +164,14 @@ public class DumpCommands {
 						});
 			}
 
-			Files.write(source.getServer().func_240776_a_(FolderName.DOT).resolve(filename), lines);
+			Files.write(source.getServer().getWorldPath(LevelResource.ROOT).resolve(filename), lines);
 
-			source.sendFeedback(new StringTextComponent("Entity brain dump saved as " + filename + " (" + lines.size() + " lines)"), true);
-			source.sendFeedback(new StringTextComponent("Dimension count: " + dimensionCount.getValue()), false);
-			source.sendFeedback(new StringTextComponent("Entities with special tasks: " + entityWithTasksCount.getValue() + "/" + entityCount.getValue()), false);
+			source.sendSuccess(new TextComponent("Entity brain dump saved as " + filename + " (" + lines.size() + " lines)"), true);
+			source.sendSuccess(new TextComponent("Dimension count: " + dimensionCount.getValue()), false);
+			source.sendSuccess(new TextComponent("Entities with special tasks: " + entityWithTasksCount.getValue() + "/" + entityCount.getValue()), false);
 			return 1;
 		} catch (Exception ex) {
-			source.sendFeedback(new StringTextComponent("Failed to create entity brain dump! See console for error"), true);
+			source.sendSuccess(new TextComponent("Failed to create entity brain dump! See console for error"), true);
 			ex.printStackTrace();
 			return 0;
 		}
@@ -158,9 +181,9 @@ public class DumpCommands {
 		lines.add(String.join(",", line));
 	}
 
-	private static int dumpRegistryKeys(CommandSource source) {
-		source.sendFeedback(new StringTextComponent("All registry keys:"), false);
-		List<String> lines = new ArrayList<>(RegistryKey.UNIVERSAL_KEY_MAP.keySet());
+	private static int dumpRegistryKeys(CommandSourceStack source) {
+		source.sendSuccess(new TextComponent("All registry keys:"), false);
+		List<String> lines = new ArrayList<>(ResourceKey.VALUES.keySet());
 		lines.sort(null);
 
 		long mem = 0L;
@@ -177,8 +200,8 @@ public class DumpCommands {
 
 		try {
 			String filename = "registry-key-dump-" + Instant.now().toString().replaceAll("[:T]", "-") + ".txt";
-			Files.write(source.getServer().func_240776_a_(FolderName.DOT).resolve(filename), lines);
-			source.sendFeedback(new StringTextComponent("Registry key dump saved as " + filename + " (" + lines.size() + " lines, " + ((long) (memd * 100D) / 100D) + " MB estimated memory use)"), true);
+			Files.write(source.getServer().getWorldPath(LevelResource.ROOT).resolve(filename), lines);
+			source.sendSuccess(new TextComponent("Registry key dump saved as " + filename + " (" + lines.size() + " lines, " + ((long) (memd * 100D) / 100D) + " MB estimated memory use)"), true);
 			return 1;
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -186,7 +209,7 @@ public class DumpCommands {
 		}
 	}
 
-	private static int dumpBlockStates(CommandSource source) {
+	private static int dumpBlockStates(CommandSourceStack source) {
 		List<String> lines = new ArrayList<>();
 		long total = 0L;
 		Map<String, MutableInt> statesPerMod = new HashMap<>();
@@ -199,7 +222,7 @@ public class DumpCommands {
 				continue;
 			}
 
-			int t = block.getStateContainer().getValidStates().size();
+			int t = block.getStateDefinition().getPossibleStates().size();
 			total += t;
 			lines.add("- " + key + "[" + t + "] - " + block.getClass().getName());
 			statesPerMod.computeIfAbsent(key.getNamespace(), k -> new MutableInt(0)).add(t);
@@ -207,7 +230,7 @@ public class DumpCommands {
 			if (t > 1) {
 				int i = 1;
 
-				for (BlockState state : block.getStateContainer().getValidStates()) {
+				for (BlockState state : block.getStateDefinition().getPossibleStates()) {
 					StringBuilder sb = new StringBuilder();
 
 					if (i < 10 && t >= 10) {
@@ -272,8 +295,8 @@ public class DumpCommands {
 
 		try {
 			String filename = "block-state-dump-" + Instant.now().toString().replaceAll("[:T]", "-") + ".txt";
-			Files.write(source.getServer().func_240776_a_(FolderName.DOT).resolve(filename), lines);
-			source.sendFeedback(new StringTextComponent("Block state dump saved as " + filename + " (" + total + " block states in total)"), true);
+			Files.write(source.getServer().getWorldPath(LevelResource.ROOT).resolve(filename), lines);
+			source.sendSuccess(new TextComponent("Block state dump saved as " + filename + " (" + total + " block states in total)"), true);
 			return 1;
 		} catch (Exception ex) {
 			ex.printStackTrace();

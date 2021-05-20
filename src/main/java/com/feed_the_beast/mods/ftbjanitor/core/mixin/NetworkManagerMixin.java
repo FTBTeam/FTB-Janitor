@@ -4,10 +4,10 @@ import com.feed_the_beast.mods.ftbjanitor.FTBJanitor;
 import com.feed_the_beast.mods.ftbjanitor.FTBJanitorConfig;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.TimeoutException;
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.SkipableEncoderException;
-import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.network.Connection;
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.SkipPacketException;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,15 +17,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * @author LatvianModder
  */
-@Mixin(NetworkManager.class)
+@Mixin(Connection.class)
 public abstract class NetworkManagerMixin {
 	@Inject(method = "exceptionCaught", at = @At("HEAD"))
 	private void exceptionCaughtFTBJ(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
-		if (FTBJanitorConfig.logNetworkErrors && !(throwable instanceof TimeoutException) && !(throwable instanceof SkipableEncoderException)) {
-			if (getNetHandler() instanceof ServerPlayNetHandler) {
-				FTBJanitor.LOGGER.info("Internal network in " + context.name() + " / ServerPlayer Handler (" + ((ServerPlayNetHandler) getNetHandler()).player.getScoreboardName() + ")");
+		if (FTBJanitorConfig.logNetworkErrors && !(throwable instanceof TimeoutException) && !(throwable instanceof SkipPacketException)) {
+			if (getPacketListener() instanceof ServerGamePacketListenerImpl) {
+				FTBJanitor.LOGGER.info("Internal network in " + context.name() + " / ServerPlayer Handler (" + ((ServerGamePacketListenerImpl) getPacketListener()).player.getScoreboardName() + ")");
 			} else {
-				FTBJanitor.LOGGER.info("Internal network in " + context.name() + " / " + getNetHandler().getClass().getName());
+				FTBJanitor.LOGGER.info("Internal network in " + context.name() + " / " + getPacketListener().getClass().getName());
 			}
 
 			throwable.printStackTrace();
@@ -33,5 +33,5 @@ public abstract class NetworkManagerMixin {
 	}
 
 	@Shadow
-	public abstract INetHandler getNetHandler();
+	public abstract PacketListener getPacketListener();
 }
