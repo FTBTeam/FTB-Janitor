@@ -1,12 +1,12 @@
-package com.feed_the_beast.mods.ftbjanitor.command;
+package dev.ftb.mods.ftbjanitor.command;
 
-import com.feed_the_beast.mods.ftbjanitor.JERDimData;
-import com.feed_the_beast.mods.ftbjanitor.JERScanner;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbjanitor.JERDimData;
+import dev.ftb.mods.ftbjanitor.JERScanner;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

@@ -1,4 +1,4 @@
-package com.feed_the_beast.mods.ftbjanitor.core;
+package dev.ftb.mods.ftbjanitor.core;
 
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;

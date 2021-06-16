@@ -1,9 +1,9 @@
-package com.feed_the_beast.mods.ftbjanitor.command;
+package dev.ftb.mods.ftbjanitor.command;
 
-import com.feed_the_beast.mods.ftbjanitor.FTBJanitor;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbjanitor.FTBJanitor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -15,7 +15,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -132,7 +131,7 @@ public class FTBJanitorCommands {
 			for (int z = pos.getZ() - radius; z <= pos.getZ() + radius; z++) {
 				int h = world.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
 
-				for (int y = 0; y < h; y++) {
+				for (int y = h - 2; y >= 0; y--) {
 					mutablePos.set(x, y, z);
 
 					if (!keepStructures || !isPartOfStructure(structures, world, mutablePos)) {
@@ -150,12 +149,17 @@ public class FTBJanitorCommands {
 		return 1;
 	}
 
-	private static boolean isPartOfStructure(List<StructureFeature<?>> structures, Level world, BlockPos pos) {
+	private static boolean isPartOfStructure(List<StructureFeature<?>> structures, ServerLevel world, BlockPos pos) {
 		if (structures.isEmpty()) {
 			return false;
 		}
 
-		// currently no way to do this
+		for (StructureFeature<?> feature : structures) {
+			if (world.structureFeatureManager().getStructureAt(pos, true, feature).isValid()) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 }

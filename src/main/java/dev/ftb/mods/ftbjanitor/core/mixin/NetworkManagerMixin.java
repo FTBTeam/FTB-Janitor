@@ -1,7 +1,7 @@
-package com.feed_the_beast.mods.ftbjanitor.core.mixin;
+package dev.ftb.mods.ftbjanitor.core.mixin;
 
-import com.feed_the_beast.mods.ftbjanitor.FTBJanitor;
-import com.feed_the_beast.mods.ftbjanitor.FTBJanitorConfig;
+import dev.ftb.mods.ftbjanitor.FTBJanitor;
+import dev.ftb.mods.ftbjanitor.FTBJanitorConfig;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.TimeoutException;
 import net.minecraft.network.Connection;

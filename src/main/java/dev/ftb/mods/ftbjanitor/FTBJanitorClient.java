@@ -1,7 +1,7 @@
-package com.feed_the_beast.mods.ftbjanitor;
+package dev.ftb.mods.ftbjanitor;
 
-import com.feed_the_beast.mods.ftbjanitor.command.FTBJanitorCommands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbjanitor.command.FTBJanitorCommands;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

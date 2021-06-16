@@ -1,6 +1,6 @@
-package com.feed_the_beast.mods.ftbjanitor.core.mixin;
+package dev.ftb.mods.ftbjanitor.core.mixin;
 
-import com.feed_the_beast.mods.ftbjanitor.FTBJanitorConfig;
+import dev.ftb.mods.ftbjanitor.FTBJanitorConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import org.spongepowered.asm.mixin.Mixin;

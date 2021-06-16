@@ -1,6 +1,6 @@
-package com.feed_the_beast.mods.ftbjanitor.core.mixin;
+package dev.ftb.mods.ftbjanitor.core.mixin;
 
-import com.feed_the_beast.mods.ftbjanitor.core.BrainFTBJ;
+import dev.ftb.mods.ftbjanitor.core.BrainFTBJ;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;

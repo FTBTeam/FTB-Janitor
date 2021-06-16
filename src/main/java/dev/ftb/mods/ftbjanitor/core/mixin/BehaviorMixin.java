@@ -1,6 +1,6 @@
-package com.feed_the_beast.mods.ftbjanitor.core.mixin;
+package dev.ftb.mods.ftbjanitor.core.mixin;
 
-import com.feed_the_beast.mods.ftbjanitor.core.BehaviorFTBJ;
+import dev.ftb.mods.ftbjanitor.core.BehaviorFTBJ;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;

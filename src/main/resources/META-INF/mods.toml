@@ -25,3 +25,10 @@ mandatory = true
 versionRange = "[1.16,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.ftbjanitor]]
+modId = "ftblibrary"
+mandatory = true
+versionRange = "[1605,)"
+ordering = "AFTER"
+side = "BOTH"

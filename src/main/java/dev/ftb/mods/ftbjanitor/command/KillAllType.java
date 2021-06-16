@@ -1,4 +1,4 @@
-package com.feed_the_beast.mods.ftbjanitor.command;
+package dev.ftb.mods.ftbjanitor.command;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;

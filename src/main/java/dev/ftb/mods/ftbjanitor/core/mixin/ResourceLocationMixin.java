@@ -1,6 +1,6 @@
-package com.feed_the_beast.mods.ftbjanitor.core.mixin;
+package dev.ftb.mods.ftbjanitor.core.mixin;
 
-import com.feed_the_beast.mods.ftbjanitor.FTBJanitor;
+import dev.ftb.mods.ftbjanitor.FTBJanitor;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

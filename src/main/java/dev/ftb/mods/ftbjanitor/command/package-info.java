@@ -1,3 +1,3 @@
 @mcp.MethodsReturnNonnullByDefault
 @javax.annotation.ParametersAreNonnullByDefault
-package com.feed_the_beast.mods.ftbjanitor.core.mixin;
+package dev.ftb.mods.ftbjanitor.command;

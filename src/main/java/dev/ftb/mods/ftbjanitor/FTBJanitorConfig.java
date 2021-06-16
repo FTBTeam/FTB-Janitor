@@ -1,4 +1,4 @@
-package com.feed_the_beast.mods.ftbjanitor;
+package dev.ftb.mods.ftbjanitor;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

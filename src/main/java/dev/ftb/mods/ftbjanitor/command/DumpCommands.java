@@ -1,11 +1,11 @@
-package com.feed_the_beast.mods.ftbjanitor.command;
+package dev.ftb.mods.ftbjanitor.command;
 
-import com.feed_the_beast.mods.ftbjanitor.FTBJanitor;
-import com.feed_the_beast.mods.ftbjanitor.core.BehaviorFTBJ;
-import com.feed_the_beast.mods.ftbjanitor.core.BrainFTBJ;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.util.UUIDTypeAdapter;
 import com.sun.management.HotSpotDiagnosticMXBean;
+import dev.ftb.mods.ftbjanitor.FTBJanitor;
+import dev.ftb.mods.ftbjanitor.core.BehaviorFTBJ;
+import dev.ftb.mods.ftbjanitor.core.BrainFTBJ;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;

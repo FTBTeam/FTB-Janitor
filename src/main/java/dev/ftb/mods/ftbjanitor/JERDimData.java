@@ -1,4 +1,4 @@
-package com.feed_the_beast.mods.ftbjanitor;
+package dev.ftb.mods.ftbjanitor;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
