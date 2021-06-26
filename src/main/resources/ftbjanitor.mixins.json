@@ -9,6 +9,7 @@
 		"MinecraftServerMixin",
 		"NetworkManagerMixin",
 		"ResourceLocationMixin",
+		"SchemaMixin",
 		"ShapedRecipeMixin"
 	],
 	"client": [
