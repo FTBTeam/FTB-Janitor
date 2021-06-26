@@ -1,23 +1,14 @@
 package dev.ftb.mods.ftbjanitor.command;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.util.UUIDTypeAdapter;
 import com.sun.management.HotSpotDiagnosticMXBean;
 import dev.ftb.mods.ftbjanitor.FTBJanitor;
-import dev.ftb.mods.ftbjanitor.core.BehaviorFTBJ;
-import dev.ftb.mods.ftbjanitor.core.BrainFTBJ;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -27,7 +18,6 @@ import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableLong;
 
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
@@ -37,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -47,7 +36,6 @@ public class DumpCommands {
 	public static void register(LiteralArgumentBuilder<CommandSourceStack> dump) {
 		dump.then(Commands.literal("heap").executes(context -> heapdump(context.getSource())));
 		dump.then(Commands.literal("modlist").executes(context -> dumpModlist(context.getSource())));
-		dump.then(Commands.literal("entity_brains").executes(context -> dumpEntityBrains(context.getSource())));
 		dump.then(Commands.literal("registry_keys").executes(context -> dumpRegistryKeys(context.getSource())));
 		dump.then(Commands.literal("block_states").executes(context -> dumpBlockStates(context.getSource())));
 		dump.then(Commands.literal("bad_synced_configs").executes(context -> dumpSyncedConfigs(context.getSource(), false)));
@@ -91,94 +79,6 @@ public class DumpCommands {
 	private static int dumpModlist(CommandSourceStack source) {
 		source.sendSuccess(new TextComponent("Mods:\n" + ModList.get().getMods().stream().map(ModInfo::getModId).sorted().collect(Collectors.joining("\n"))), true);
 		return 1;
-	}
-
-	private static int dumpEntityBrains(CommandSourceStack source) {
-		source.sendSuccess(new TextComponent("Creating entity brain dump (this may take a while...)"), true);
-
-		try {
-			String[] line = {
-					"Dimension",
-					"Entity Type",
-					"Entity UUID",
-					"Priority",
-					"Activity",
-					"Task Type",
-					"Task Status",
-					"Memory Module Type",
-					"Memory Module Status",
-			};
-
-			List<String> lines = new ArrayList<>();
-			print(lines, line);
-			String filename = "entity-brain-dump-" + Instant.now().toString().replaceAll("[:T]", "-") + ".csv";
-
-			MutableLong dimensionCount = new MutableLong(0L);
-			MutableLong entityCount = new MutableLong(0L);
-			MutableLong entityWithTasksCount = new MutableLong(0L);
-
-			for (ServerLevel world : source.getServer().getAllLevels()) {
-				line[0] = world.dimension().location().toString();
-				dimensionCount.increment();
-
-				world.getEntities()
-						.filter(entity -> entity instanceof LivingEntity)
-						.map(entity -> (LivingEntity) entity)
-						.filter(entity -> entity.getBrain() instanceof BrainFTBJ)
-						.forEach(entity -> {
-							entityCount.increment();
-
-							Map<Integer, Map<Activity, Set<Behavior<?>>>> taskPriorityMap = ((BrainFTBJ) entity.getBrain()).getTaskPriorityMapFTBJ();
-
-							if (taskPriorityMap.isEmpty()) {
-								return;
-							}
-
-							entityWithTasksCount.increment();
-							line[1] = entity.getScoreboardName();
-
-							if (line[1] == null) {
-								line[1] = entity.getClass().getName();
-							}
-
-							line[2] = UUIDTypeAdapter.fromUUID(entity.getUUID());
-
-							for (Map.Entry<Integer, Map<Activity, Set<Behavior<?>>>> entry : taskPriorityMap.entrySet()) {
-								line[3] = entry.getKey().toString();
-
-								for (Map.Entry<Activity, Set<Behavior<?>>> entry1 : entry.getValue().entrySet()) {
-									line[4] = entry1.getKey().getName();
-
-									for (Behavior<?> task : entry1.getValue()) {
-										line[5] = task.getClass().getSimpleName();
-										line[6] = task.getStatus().name().toLowerCase();
-
-										for (Map.Entry<MemoryModuleType<?>, MemoryStatus> entry2 : ((BehaviorFTBJ) task).getRequiredMemoryStateFTBJ().entrySet()) {
-											line[7] = entry2.getKey().toString();
-											line[8] = entry2.getValue().name().toLowerCase();
-											print(lines, line);
-										}
-									}
-								}
-							}
-						});
-			}
-
-			Files.write(source.getServer().getWorldPath(LevelResource.ROOT).resolve(filename), lines);
-
-			source.sendSuccess(new TextComponent("Entity brain dump saved as " + filename + " (" + lines.size() + " lines)"), true);
-			source.sendSuccess(new TextComponent("Dimension count: " + dimensionCount.getValue()), false);
-			source.sendSuccess(new TextComponent("Entities with special tasks: " + entityWithTasksCount.getValue() + "/" + entityCount.getValue()), false);
-			return 1;
-		} catch (Exception ex) {
-			source.sendSuccess(new TextComponent("Failed to create entity brain dump! See console for error"), true);
-			ex.printStackTrace();
-			return 0;
-		}
-	}
-
-	private static void print(List<String> lines, String[] line) {
-		lines.add(String.join(",", line));
 	}
 
 	private static int dumpRegistryKeys(CommandSourceStack source) {
