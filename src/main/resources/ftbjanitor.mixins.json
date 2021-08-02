@@ -6,7 +6,6 @@
 		"CommandsMixin",
 		"MinecraftServerMixin",
 		"NetworkManagerMixin",
-		"ResourceLocationMixin",
 		"SchemaMixin",
 		"ShapedRecipeMixin"
 	],

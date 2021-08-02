@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbjanitor;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbjanitor.command.FTBJanitorCommands;
+import dev.ftb.mods.ftblibrary.util.StringUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -43,24 +44,24 @@ public class FTBJanitorClient extends FTBJanitorCommon {
 
 			ResourceManager manager = Minecraft.getInstance().getResourceManager();
 			LinkedHashSet<ResourceLocation> locations = new LinkedHashSet<>();
-			FTBJanitor.ignoreResourceLocationErrors = true;
+			StringUtils.ignoreResourceLocationErrors = true;
 
 			try {
-				locations.addAll(manager.listResources(".", s -> true));
-				locations.addAll(manager.listResources("textures", s -> true));
-				locations.addAll(manager.listResources("font", s -> true));
-				locations.addAll(manager.listResources("lang", s -> true));
-				locations.addAll(manager.listResources("blockstates", s -> true));
-				locations.addAll(manager.listResources("models", s -> true));
-				locations.addAll(manager.listResources("particles", s -> true));
-				locations.addAll(manager.listResources("shaders", s -> true));
-				locations.addAll(manager.listResources("texts", s -> true));
-				locations.addAll(manager.listResources("sounds", s -> true));
+				locations.addAll(manager.listResources(".", StringUtils.ALWAYS_TRUE));
+				locations.addAll(manager.listResources("textures", StringUtils.ALWAYS_TRUE));
+				locations.addAll(manager.listResources("font", StringUtils.ALWAYS_TRUE));
+				locations.addAll(manager.listResources("lang", StringUtils.ALWAYS_TRUE));
+				locations.addAll(manager.listResources("blockstates", StringUtils.ALWAYS_TRUE));
+				locations.addAll(manager.listResources("models", StringUtils.ALWAYS_TRUE));
+				locations.addAll(manager.listResources("particles", StringUtils.ALWAYS_TRUE));
+				locations.addAll(manager.listResources("shaders", StringUtils.ALWAYS_TRUE));
+				locations.addAll(manager.listResources("texts", StringUtils.ALWAYS_TRUE));
+				locations.addAll(manager.listResources("sounds", StringUtils.ALWAYS_TRUE));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 
-			FTBJanitor.ignoreResourceLocationErrors = false;
+			StringUtils.ignoreResourceLocationErrors = false;
 
 			for (ResourceLocation res : locations) {
 				long size = 0L;

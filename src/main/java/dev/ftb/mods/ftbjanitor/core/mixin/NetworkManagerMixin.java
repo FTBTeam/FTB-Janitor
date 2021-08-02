@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class NetworkManagerMixin {
 	@Inject(method = "exceptionCaught", at = @At("HEAD"))
 	private void exceptionCaughtFTBJ(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
-		if (FTBJanitorConfig.logNetworkErrors && !(throwable instanceof TimeoutException) && !(throwable instanceof SkipPacketException)) {
+		if (FTBJanitorConfig.get().logNetworkErrors.get() && !(throwable instanceof TimeoutException) && !(throwable instanceof SkipPacketException)) {
 			if (getPacketListener() instanceof ServerGamePacketListenerImpl) {
 				FTBJanitor.LOGGER.info("Internal network in " + context.name() + " / ServerPlayer Handler (" + ((ServerGamePacketListenerImpl) getPacketListener()).player.getScoreboardName() + ")");
 			} else {

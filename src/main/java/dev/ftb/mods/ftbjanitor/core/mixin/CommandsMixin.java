@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class CommandsMixin {
 	@Inject(method = "performCommand", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;execute(Lcom/mojang/brigadier/ParseResults;)I", remap = false))
 	private void handleCommandFTBJ(CommandSourceStack source, String command, CallbackInfoReturnable<Integer> cir) {
-		if (FTBJanitorConfig.printCommandStacktrace) {
+		if (FTBJanitorConfig.get().printCommandStacktrace.get()) {
 			new Exception("Command '" + command + "': (This is not an error!)").printStackTrace();
 		}
 	}

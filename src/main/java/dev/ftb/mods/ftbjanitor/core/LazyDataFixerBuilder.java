@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbjanitor.core;
 
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixerBuilder;
+import dev.ftb.mods.ftbjanitor.FTBJanitor;
 
 import java.util.concurrent.Executor;
 
@@ -14,6 +15,7 @@ public class LazyDataFixerBuilder extends DataFixerBuilder {
 
 	public LazyDataFixerBuilder(int dataVersion) {
 		super(dataVersion);
+		FTBJanitor.LOGGER.info("Lazy DFU Loaded");
 	}
 
 	@Override

@@ -1,74 +1,42 @@
 package dev.ftb.mods.ftbjanitor;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.commons.lang3.tuple.Pair;
+import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
+import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import net.minecraftforge.fml.loading.FMLPaths;
+
+import java.nio.file.Path;
 
 /**
  * @author LatvianModder
  */
 public class FTBJanitorConfig {
-	public static boolean logTagCreation;
-	public static boolean logNetworkErrors;
-	public static boolean disableRecipeShrinking;
-	public static boolean printReloadStacktrace;
-	public static boolean printCommandStacktrace;
+	private static FTBJanitorConfig instance;
 
-	private static Pair<CommonConfig, ForgeConfigSpec> common;
+	public static FTBJanitorConfig get() {
+		if (instance == null) {
+			instance = new FTBJanitorConfig();
+		}
 
-	public static void init() {
-		FMLJavaModLoadingContext.get().getModEventBus().register(FTBJanitorConfig.class);
-
-		common = new ForgeConfigSpec.Builder().configure(CommonConfig::new);
-
-		ModLoadingContext modLoadingContext = ModLoadingContext.get();
-		modLoadingContext.registerConfig(ModConfig.Type.COMMON, common.getRight());
+		return instance;
 	}
 
-	@SubscribeEvent
-	public static void reload(ModConfig.ModConfigEvent event) {
-		ModConfig config = event.getConfig();
+	public final SNBTConfig config;
+	public final BooleanValue logTagCreation;
+	public final BooleanValue logNetworkErrors;
+	public final BooleanValue disableRecipeShrinking;
+	public final BooleanValue printReloadStacktrace;
+	public final BooleanValue printCommandStacktrace;
+	public final BooleanValue lazyDFU;
 
-		if (config.getSpec() == common.getRight()) {
-			CommonConfig c = common.getLeft();
-			logTagCreation = c.logTagCreation.get();
-			logNetworkErrors = c.logNetworkErrors.get();
-			disableRecipeShrinking = c.disableRecipeShrinking.get();
-			printReloadStacktrace = c.printReloadStacktrace.get();
-			printCommandStacktrace = c.printCommandStacktrace.get();
-		}
-	}
-
-	private static class CommonConfig {
-		private final ForgeConfigSpec.BooleanValue logTagCreation;
-		private final ForgeConfigSpec.BooleanValue logNetworkErrors;
-		private final ForgeConfigSpec.BooleanValue disableRecipeShrinking;
-		private final ForgeConfigSpec.BooleanValue printReloadStacktrace;
-		private final ForgeConfigSpec.BooleanValue printCommandStacktrace;
-
-		private CommonConfig(ForgeConfigSpec.Builder builder) {
-			logTagCreation = builder
-					.comment("Prints new tag creation in console")
-					.define("logTagCreation", false);
-
-			logNetworkErrors = builder
-					.comment("Prints network errors in normal log rather than debug")
-					.define("logNetworkErrors", false);
-
-			disableRecipeShrinking = builder
-					.comment("Vanilla shrinks recipe patterns to try to optimise them, but it's sometimes breaking some modded recipes")
-					.define("disableRecipeShrinking", false);
-
-			printReloadStacktrace = builder
-					.comment("Print whenever a reload is triggered")
-					.define("printReloadStacktrace", false);
-
-			printCommandStacktrace = builder
-					.comment("Print whenever a command is run")
-					.define("printCommandStacktrace", false);
-		}
+	private FTBJanitorConfig() {
+		Path path = FMLPaths.CONFIGDIR.get().resolve("ftbjanitor.snbt");
+		config = SNBTConfig.create(FTBJanitor.MOD_ID);
+		logTagCreation = config.getBoolean("logTagCreation", false).comment("Prints new tag creation in console");
+		logNetworkErrors = config.getBoolean("logNetworkErrors", false).comment("Prints network errors in normal log rather than debug");
+		disableRecipeShrinking = config.getBoolean("disableRecipeShrinking", false).comment("Vanilla shrinks recipe patterns to try to optimise them, but it's sometimes breaking some modded recipes");
+		printReloadStacktrace = config.getBoolean("printReloadStacktrace", false).comment("Print whenever a reload is triggered");
+		printCommandStacktrace = config.getBoolean("printCommandStacktrace", false).comment("Print whenever a command is run");
+		lazyDFU = config.getBoolean("lazyDFU", true).comment("Enables lazy DataFixerUpper");
+		config.load(path);
 	}
 }

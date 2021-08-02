@@ -21,12 +21,10 @@ public class FTBJanitor {
 	public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 	public static FTBJanitorCommon proxy;
 
-	public static boolean ignoreResourceLocationErrors = false;
-
 	public FTBJanitor() {
 		Locale.setDefault(Locale.US);
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-		FTBJanitorConfig.init();
+		FTBJanitorConfig.get();
 		proxy = DistExecutor.safeRunForDist(() -> FTBJanitorClient::new, () -> FTBJanitorCommon::new);
 	}
 }

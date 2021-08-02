@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 public abstract class MinecraftServerMixin {
 	@Inject(method = "reloadResources", at = @At("HEAD"))
 	private void reloadFTBJ(Collection<String> packs, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-		if (FTBJanitorConfig.printReloadStacktrace) {
+		if (FTBJanitorConfig.get().printReloadStacktrace.get()) {
 			new Exception("Reload '" + packs + "': (This is not an error!)").printStackTrace();
 		}
 	}

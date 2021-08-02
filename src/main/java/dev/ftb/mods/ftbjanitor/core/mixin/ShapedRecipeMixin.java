@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ShapedRecipeMixin {
 	@Inject(method = "shrink", at = @At("HEAD"), cancellable = true)
 	private static void shrinkFTBJ(String[] in, CallbackInfoReturnable<String[]> ci) {
-		if (FTBJanitorConfig.disableRecipeShrinking) {
+		if (FTBJanitorConfig.get().disableRecipeShrinking.get()) {
 			ci.setReturnValue(in);
 		}
 	}
