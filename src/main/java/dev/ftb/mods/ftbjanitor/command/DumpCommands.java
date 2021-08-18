@@ -9,6 +9,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -33,6 +35,31 @@ import java.util.stream.Collectors;
  * @author LatvianModder
  */
 public class DumpCommands {
+	public static boolean dumpItemCapabilityAttachStacks = false;
+
+	public static void printStack(String name, String skipUntil, String skipAfter) {
+		FTBJanitor.LOGGER.info(name);
+		boolean found = skipUntil.isEmpty();
+
+		for (StackTraceElement element : new Exception("Dummy Exception").getStackTrace()) {
+			String s = element.toString();
+
+			if (!found) {
+				if (s.startsWith(skipUntil)) {
+					found = true;
+				}
+
+				continue;
+			}
+
+			if (!skipAfter.isEmpty() && s.startsWith(skipAfter)) {
+				return;
+			} else {
+				FTBJanitor.LOGGER.info("> " + s);
+			}
+		}
+	}
+
 	public static void register(LiteralArgumentBuilder<CommandSourceStack> dump) {
 		dump.then(Commands.literal("heap").executes(context -> heapdump(context.getSource())));
 		dump.then(Commands.literal("modlist").executes(context -> dumpModlist(context.getSource())));
@@ -40,6 +67,7 @@ public class DumpCommands {
 		dump.then(Commands.literal("block_states").executes(context -> dumpBlockStates(context.getSource())));
 		dump.then(Commands.literal("bad_synced_configs").executes(context -> dumpSyncedConfigs(context.getSource(), false)));
 		dump.then(Commands.literal("all_synced_configs").executes(context -> dumpSyncedConfigs(context.getSource(), true)));
+		dump.then(Commands.literal("item_capability_attach_stacks").executes(context -> dumpItemCapabilityAttachStacks(context.getSource())));
 	}
 
 	private static <T> T cast(Object o) {
@@ -202,5 +230,15 @@ public class DumpCommands {
 			ex.printStackTrace();
 			return 0;
 		}
+	}
+
+	private static int dumpItemCapabilityAttachStacks(CommandSourceStack source) {
+		FTBJanitor.LOGGER.info("=============== Item AttachCapabilitiesEvent<ItemStack> Dump Start ===============");
+		dumpItemCapabilityAttachStacks = true;
+		new ItemStack(Items.APPLE);
+		dumpItemCapabilityAttachStacks = false;
+		FTBJanitor.LOGGER.info("=============== Item AttachCapabilitiesEvent<ItemStack> Dump End =================");
+		source.sendSuccess(new TextComponent("Done! Check latest.log! You may see same thing multiple times"), false);
+		return 1;
 	}
 }

@@ -1,5 +1,15 @@
 package dev.ftb.mods.ftbjanitor;
 
+import dev.ftb.mods.ftbjanitor.command.DumpCommands;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -8,6 +18,8 @@ import net.minecraftforge.fml.network.FMLNetworkConstants;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 
@@ -15,6 +27,7 @@ import java.util.Locale;
  * @author LatvianModder
  */
 @Mod(FTBJanitor.MOD_ID)
+@Mod.EventBusSubscriber
 public class FTBJanitor {
 	public static final String MOD_ID = "ftbjanitor";
 	public static final String MOD_NAME = "FTB Janitor";
@@ -26,5 +39,18 @@ public class FTBJanitor {
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 		FTBJanitorConfig.get();
 		proxy = DistExecutor.safeRunForDist(() -> FTBJanitorClient::new, () -> FTBJanitorCommon::new);
+	}
+
+	@SubscribeEvent
+	public static void attach(AttachCapabilitiesEvent<ItemStack> event) {
+		if (DumpCommands.dumpItemCapabilityAttachStacks && event.getObject().getItem() == Items.APPLE) {
+			event.addCapability(new ResourceLocation("ftbjanitor:example"), new ICapabilityProvider() {
+				@NotNull
+				@Override
+				public <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction arg) {
+					return LazyOptional.empty();
+				}
+			});
+		}
 	}
 }

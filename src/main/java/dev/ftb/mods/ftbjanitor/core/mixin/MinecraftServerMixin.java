@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbjanitor.core.mixin;
 
 import dev.ftb.mods.ftbjanitor.FTBJanitorConfig;
+import dev.ftb.mods.ftbjanitor.command.DumpCommands;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,7 +16,7 @@ public abstract class MinecraftServerMixin {
 	@Inject(method = "reloadResources", at = @At("HEAD"))
 	private void reloadFTBJ(Collection<String> packs, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
 		if (FTBJanitorConfig.get().printReloadStacktrace.get()) {
-			new Exception("Reload '" + packs + "': (This is not an error!)").printStackTrace();
+			DumpCommands.printStack("Reloaded server resources", "", "");
 		}
 	}
 }

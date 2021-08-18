@@ -3,6 +3,7 @@
 	"package": "dev.ftb.mods.ftbjanitor.core.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
+		"AttachCapabilitiesEventMixin",
 		"CommandsMixin",
 		"MinecraftServerMixin",
 		"NetworkManagerMixin",

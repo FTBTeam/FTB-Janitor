@@ -35,7 +35,7 @@ public class FTBJanitorConfig {
 		logNetworkErrors = config.getBoolean("logNetworkErrors", false).comment("Prints network errors in normal log rather than debug");
 		disableRecipeShrinking = config.getBoolean("disableRecipeShrinking", false).comment("Vanilla shrinks recipe patterns to try to optimise them, but it's sometimes breaking some modded recipes");
 		printReloadStacktrace = config.getBoolean("printReloadStacktrace", false).comment("Print whenever a reload is triggered");
-		printCommandStacktrace = config.getBoolean("printCommandStacktrace", false).comment("Print whenever a command is run");
+		printCommandStacktrace = config.getBoolean("printCommandStacktrace", false).comment("Print whenever a command is run. Used to catch /reload startup mods");
 		lazyDFU = config.getBoolean("lazyDFU", true).comment("Enables lazy DataFixerUpper");
 		config.load(path);
 	}
