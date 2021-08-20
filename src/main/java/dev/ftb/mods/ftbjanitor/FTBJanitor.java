@@ -27,7 +27,6 @@ import java.util.Locale;
  * @author LatvianModder
  */
 @Mod(FTBJanitor.MOD_ID)
-@Mod.EventBusSubscriber
 public class FTBJanitor {
 	public static final String MOD_ID = "ftbjanitor";
 	public static final String MOD_NAME = "FTB Janitor";
