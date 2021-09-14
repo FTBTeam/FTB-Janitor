@@ -3,12 +3,14 @@ package dev.ftb.mods.ftbjanitor;
 import dev.ftb.mods.ftbjanitor.command.DumpCommands;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
@@ -27,6 +29,7 @@ import java.util.Locale;
  * @author LatvianModder
  */
 @Mod(FTBJanitor.MOD_ID)
+@Mod.EventBusSubscriber(modid = FTBJanitor.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FTBJanitor {
 	public static final String MOD_ID = "ftbjanitor";
 	public static final String MOD_NAME = "FTB Janitor";
@@ -50,6 +53,13 @@ public class FTBJanitor {
 					return LazyOptional.empty();
 				}
 			});
+		}
+	}
+
+	@SubscribeEvent
+	public static void soundPlayed(PlaySoundAtEntityEvent event) {
+		if (event.getSound() == SoundEvents.ARMOR_EQUIP_GENERIC) {
+			new RuntimeException("Dummy exception").printStackTrace();
 		}
 	}
 }
