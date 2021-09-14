@@ -59,7 +59,7 @@ public class FTBJanitor {
 	@SubscribeEvent
 	public static void soundPlayed(PlaySoundAtEntityEvent event) {
 		if (event.getSound() == SoundEvents.ARMOR_EQUIP_GENERIC) {
-			new RuntimeException("Dummy exception").printStackTrace();
+			new RuntimeException("Dummy exception from entity " + event.getEntity()).printStackTrace();
 		}
 	}
 }
