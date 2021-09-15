@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbjanitor;
 import dev.ftb.mods.ftbjanitor.command.DumpCommands;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.capabilities.Capability;
@@ -58,8 +57,8 @@ public class FTBJanitor {
 
 	@SubscribeEvent
 	public static void soundPlayed(PlaySoundAtEntityEvent event) {
-		if (event.getSound() == SoundEvents.ARMOR_EQUIP_GENERIC) {
-			new RuntimeException("Dummy exception from entity " + event.getEntity()).printStackTrace();
-		}
+		//if (event.getSound() == SoundEvents.ARMOR_EQUIP_GENERIC) {
+		//	new RuntimeException("Dummy exception from entity " + event.getEntity()).printStackTrace();
+		//}
 	}
 }
