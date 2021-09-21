@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbjanitor;
 
 import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
+import dev.ftb.mods.ftblibrary.snbt.config.IntArrayValue;
 import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -29,6 +30,7 @@ public class FTBJanitorConfig {
 	public final BooleanValue printCommandStacktrace;
 	public final BooleanValue lazyDFU;
 	public final IntValue refreshBiomes;
+	public final IntArrayValue forcedSpawnPos;
 
 	private FTBJanitorConfig() {
 		Path path = FMLPaths.CONFIGDIR.get().resolve("ftbjanitor.snbt");
@@ -40,6 +42,7 @@ public class FTBJanitorConfig {
 		printCommandStacktrace = config.getBoolean("printCommandStacktrace", false).comment("Print whenever a command is run. Used to catch /reload startup mods");
 		lazyDFU = config.getBoolean("lazyDFU", true).comment("Enables lazy DataFixerUpper");
 		refreshBiomes = config.getInt("refreshBiomes", 0, 0, Integer.MAX_VALUE).comment("Increment this number every time you want to reset biomes in world");
+		forcedSpawnPos = config.getIntArray("forcedSpawnPos", new int[0]).comment("Forces spawn location and removes valid spawn check. [I; X, Y, Z]");
 		config.load(path);
 	}
 }
