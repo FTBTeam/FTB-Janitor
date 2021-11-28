@@ -80,7 +80,12 @@ public class FTBJanitorCommands {
 
 		command.then(Commands.literal("count_ores")
 				.then(Commands.argument("chunk_radius", IntegerArgumentType.integer(1, 25))
-						.executes(context -> countOres(context.getSource(), IntegerArgumentType.getInteger(context, "chunk_radius")))
+						.executes(context -> countOres(context.getSource(), IntegerArgumentType.getInteger(context, "chunk_radius"), 0, 255))
+						.then(Commands.argument("min_y", IntegerArgumentType.integer(0, 255))
+								.then(Commands.argument("max_y", IntegerArgumentType.integer(0, 255))
+										.executes(context -> countOres(context.getSource(), IntegerArgumentType.getInteger(context, "chunk_radius"), IntegerArgumentType.getInteger(context, "min_y"), IntegerArgumentType.getInteger(context, "max_y")))
+								)
+						)
 				)
 		);
 
@@ -177,7 +182,7 @@ public class FTBJanitorCommands {
 		return false;
 	}
 
-	private static int countOres(CommandSourceStack source, int chunkRadius) {
+	private static int countOres(CommandSourceStack source, int chunkRadius, int minY, int maxY) {
 		int radius = chunkRadius - 1;
 		source.sendSuccess(new TextComponent("Loading " + ((radius * 2 + 1) * (radius * 2 + 1)) + " chunks, expect lag..."), false);
 
@@ -211,9 +216,9 @@ public class FTBJanitorCommands {
 			for (ChunkAccess chunk : chunks) {
 				for (int bx = 0; bx < 16; bx++) {
 					for (int bz = 0; bz < 16; bz++) {
-						int h = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz);
+						int h = Math.min(maxY, chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz));
 
-						for (int y = 0; y < h; y++) {
+						for (int y = minY; y < h; y++) {
 							pos.set(bz, y, bz);
 							BlockState block = chunk.getBlockState(pos);
 
