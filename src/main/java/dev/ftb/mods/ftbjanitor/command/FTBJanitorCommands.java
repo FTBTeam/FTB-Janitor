@@ -18,15 +18,23 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -67,6 +75,12 @@ public class FTBJanitorCommands {
 						.then(Commands.argument("keep_structures", BoolArgumentType.bool())
 								.executes(context -> clearArea(context.getSource(), IntegerArgumentType.getInteger(context, "radius"), BoolArgumentType.getBool(context, "keep_structures"), false))
 						)
+				)
+		);
+
+		command.then(Commands.literal("count_ores")
+				.then(Commands.argument("chunk_radius", IntegerArgumentType.integer(1, 25))
+						.executes(context -> countOres(context.getSource(), IntegerArgumentType.getInteger(context, "chunk_radius")))
 				)
 		);
 
@@ -161,5 +175,70 @@ public class FTBJanitorCommands {
 		}
 
 		return false;
+	}
+
+	private static int countOres(CommandSourceStack source, int chunkRadius) {
+		int radius = chunkRadius - 1;
+		source.sendSuccess(new TextComponent("Loading " + ((radius * 2 + 1) * (radius * 2 + 1)) + " chunks, expect lag..."), false);
+
+		Thread thread = new Thread(() -> {
+			BlockPos sourcePos = new BlockPos(source.getPosition());
+			int cx = sourcePos.getX() >> 4;
+			int cz = sourcePos.getZ() >> 4;
+			List<ChunkAccess> chunks = new ArrayList<>();
+
+			for (int x = cx - radius; x <= cx + radius; x++) {
+				for (int z = cz - radius; z <= cz + radius; z++) {
+					if (!source.getServer().isRunning()) {
+						return;
+					}
+
+					final ChunkAccess chunk = source.getLevel().getChunk(x, z, ChunkStatus.FULL, true);
+
+					if (chunk != null) {
+						chunks.add(chunk);
+					}
+				}
+			}
+
+			source.sendSuccess(new TextComponent("Found " + chunks.size() + " chunks, scanning blocks..."), false);
+
+			BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+			int count = 0;
+			int blocks = 0;
+			Map<Block, MutableInt> ores = new HashMap<>();
+
+			for (ChunkAccess chunk : chunks) {
+				for (int bx = 0; bx < 16; bx++) {
+					for (int bz = 0; bz < 16; bz++) {
+						int h = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz);
+
+						for (int y = 0; y < h; y++) {
+							pos.set(bz, y, bz);
+							BlockState block = chunk.getBlockState(pos);
+
+							if (!block.isAir() && Tags.Blocks.ORES.contains(block.getBlock())) {
+								count++;
+								ores.computeIfAbsent(block.getBlock(), (block1) -> new MutableInt()).increment();
+							}
+
+							blocks++;
+
+							if (!source.getServer().isRunning()) {
+								return;
+							}
+						}
+					}
+				}
+			}
+
+			source.sendSuccess(new TextComponent("Found " + count + " ores, " + blocks + " blocks in total. See latest.log for full printout."), false);
+
+			FTBJanitor.LOGGER.info("Ore counts:\nTotal chunks: " + chunks.size() + "\nTotal blocks: " + blocks + "\nTotal ores: " + count + "\n\n" + ores.entrySet().stream().sorted((a, b) -> -a.getValue().compareTo(b.getValue())).map(e -> e.getKey().getRegistryName() + "," + e.getValue()).collect(Collectors.joining("\n")));
+		}, "Ore-Count");
+
+		thread.setDaemon(true);
+		thread.start();
+		return 1;
 	}
 }
