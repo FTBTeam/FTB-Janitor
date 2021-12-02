@@ -39,16 +39,18 @@ public class JERScanner implements Runnable {
 	public final int radius;
 	public final int startX, startZ;
 	public final Set<Block> whitelist;
+	public final boolean drops;
 	public long blocksScanned;
 	public Consumer<Component> callback;
 
-	public JERScanner(int h, int r, int sx, int sz, Set<Block> w) {
+	public JERScanner(int h, int r, int sx, int sz, Set<Block> w, boolean d) {
 		dimensions = new ArrayList<>();
 		height = h;
 		radius = r;
 		startX = sx;
 		startZ = sz;
 		whitelist = w;
+		drops = d;
 		blocksScanned = 0L;
 		stop = true;
 	}
@@ -134,12 +136,13 @@ public class JERScanner implements Runnable {
 						sb.append(',');
 
 						MutableLong m = data.distribution[y].get(block);
-						sb.append(m == null ? "0.0" : Double.toString(m.getValue().doubleValue() / (double) blocks));
+						String b = m == null ? "0.0" : Double.toString(m.getValue().doubleValue() / (double) blocks);
+						sb.append(b.endsWith(".0") ? b.substring(0, b.length() - 2) : b);
 					}
 
 					JsonObject json = new JsonObject();
 					json.addProperty("block", Registry.BLOCK.getKey(block).toString());
-					json.addProperty("silktouch", false);
+					// json.addProperty("silktouch", false);
 					json.addProperty("dim", data.dimension.dimension().location().toString());
 					json.addProperty("distrib", sb.toString());
 					array.add(json);

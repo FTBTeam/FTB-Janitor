@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbjanitor.JERDimData;
 import dev.ftb.mods.ftbjanitor.JERScanner;
@@ -36,7 +37,10 @@ public class JERCommands {
 	public static void register(LiteralArgumentBuilder<CommandSourceStack> command) {
 		command.then(Commands.literal("jer_worldgen")
 				.then(Commands.literal("start")
-						.executes(context -> jerStart(context.getSource()))
+						.executes(context -> jerStart(context.getSource(), false))
+						.then(Commands.argument("drops", BoolArgumentType.bool())
+								.executes(context -> jerStart(context.getSource(), BoolArgumentType.getBool(context, "drops")))
+						)
 				)
 				.then(Commands.literal("stop")
 						.executes(context -> jerStop(context.getSource()))
@@ -44,7 +48,7 @@ public class JERCommands {
 		);
 	}
 
-	private static int jerStart(CommandSourceStack source) {
+	private static int jerStart(CommandSourceStack source, boolean drops) {
 		if (JERScanner.current != null) {
 			source.sendSuccess(new TextComponent("JER Scanner is already running!"), false);
 			return 0;
@@ -104,7 +108,7 @@ public class JERCommands {
 
 				blocks.remove(Blocks.AIR);
 
-				JERScanner.current = new JERScanner(height, radius, startX, startZ, blocks);
+				JERScanner.current = new JERScanner(height, radius, startX, startZ, blocks, drops);
 
 				JsonObject dimensions = json.get("dimensions").getAsJsonObject();
 
